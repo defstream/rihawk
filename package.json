@@ -1,0 +1,29 @@
+{
+  "name": "rihawk",
+  "description": "A streaming riakpbc wrapper with advanced features",
+  "version": "0.0.1",
+  "homepage": "https://github.com/defstream/rihawk",
+  "bugs": "https://github.com/defstream/rihawk/issues",
+  "author": {
+    "name": "Hector Gray",
+    "email": "defstream@gmail.com",
+    "url": "http://www.hectorgray.com"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/defstream/rihawk"
+  },
+  "keywords": [],
+  "engines": {
+    "node": ">=0.10.32"
+  },
+  "main": "lib/rihawk.js",
+  "dependencies": {
+    "riakpbc": "^2.1.0"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "mocha test",
+    "prepublish": "doxx -s lib -t docs"
+  }
+}
