@@ -19,6 +19,9 @@
   },
   "main": "lib/client.js",
   "dependencies": {
+    "install": "^0.1.8",
+    "neo-async": "^0.5.3",
+    "npm": "^2.5.0",
     "riakpbc": "^2.1.0"
   },
   "devDependencies": {},
