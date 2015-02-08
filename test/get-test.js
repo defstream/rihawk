@@ -12,7 +12,7 @@ describe('Get', function() {
     new Get({
       client: riak,
       bucket: 'nfl_team',
-      keys: 'SD'
+      key: 'SD'
     }).on('data', function(data) {
       console.log('#data', data);
     }).on('error', function(err) {
@@ -26,7 +26,7 @@ describe('Get', function() {
     new Get({
       client: riak,
       bucket: ['nfl_team'],
-      keys: ['SD', 'MIA', 'CHI', 'OAK', 'FAKETEAM', 'ATL']
+      key: ['SD', 'MIA', 'CHI', 'OAK', 'FAKETEAM', 'ATL']
     }).on('data', function(data) {
       console.log('#data', data);
     }).on('error', function(err) {
@@ -40,7 +40,7 @@ describe('Get', function() {
     new Get({
       client: riak,
       bucket: ['nfl_team', 'fake_bucket'],
-      keys: ['SD', 'MIA', 'CHI', 'OAK', 'FAKETEAM', 'ATL']
+      key: ['SD', 'MIA', 'CHI', 'OAK', 'FAKETEAM', 'ATL']
     }).on('data', function(data) {
       console.log('#data', data);
     }).on('error', function(err) {
