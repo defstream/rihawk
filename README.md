@@ -34,8 +34,7 @@ var client = new Rihawk({
 **Response**: An instance of the Get response stream.
 **Example**:
 ```javascript
-var request = 
-client.get('nfl_team', 'CHI')
+var request = client.get('nfl_team', 'CHI')
   .on('data', function(data) {
     console.log('#DATA', data);
   })
