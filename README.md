@@ -13,7 +13,6 @@ Returns a new instance of the Rihawk client.
 
 **returns**: a new instance of the Rihawk client.
 
-**example**:
 ```javascript
 var Rihawk = require('rihawk');
 
@@ -38,9 +37,35 @@ var client = new Rihawk({
 
 **returns**: a readable stream emitting data events for each found value.
 
-**example**:
+**get(bucket, key, options)**
 ```javascript
 var request = client.get('nfl_team', 'CHI')
+  .on('data', function(data) {
+    console.log('#DATA', data);
+  })
+  .on('error', function(error) {
+    console.log('#ERROR', error);
+  }).on('end', function() {
+    console.log('#END');
+  });
+```
+
+**get(bucket, [key], options)**
+```javascript
+var request = client.get('nfl_team', ['CHI', 'MIA', 'SD'])
+  .on('data', function(data) {
+    console.log('#DATA', data);
+  })
+  .on('error', function(error) {
+    console.log('#ERROR', error);
+  }).on('end', function() {
+    console.log('#END');
+  });
+```
+
+**get(bucket, key, options)**
+```javascript
+var request = client.get(['nfl_team', 'baseball_team'], ['CHI', 'MIA', 'SD'])
   .on('data', function(data) {
     console.log('#DATA', data);
   })
