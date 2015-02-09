@@ -63,7 +63,7 @@ var request = client.get('nfl_team', ['CHI', 'MIA', 'SD'])
   });
 ```
 
-**get(bucket, key, options)**
+**get([bucket], [key], options)**
 ```javascript
 var request = client.get(['nfl_team', 'baseball_team'], ['CHI', 'MIA', 'SD'])
   .on('data', function(data) {
