@@ -10,6 +10,7 @@ A streaming riakpbc wrapper with advanced features.
   **parameters:**
   - **options**: [riakpbc options](https://github.com/nlf/riakpbc/blob/master/lib/options.js)
 
+
   **returns**: a new instance of the Rihawk client.
 
   **example**:
@@ -29,12 +30,15 @@ A streaming riakpbc wrapper with advanced features.
   ```
 
 ### `client.get(bucket, key, options)`
+
   **parameters:** 
   - **bucket**: The bucket to query
   - **key**: The key to return a value for
   - **options**: The riak pbc request options
 
+
   **returns**: a readable stream emitting data events for each found value.
+
 
   **example**:
   ```javascript
