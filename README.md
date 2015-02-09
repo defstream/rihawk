@@ -9,7 +9,9 @@ Returns a new instance of the Rihawk client.
 
 **Parameters:**
 - **options**: [riakpbc Options](https://github.com/nlf/riakpbc/blob/master/lib/options.js)
+
 **Response**: A new instance of the Rihawk client.
+
 **Example**:
 ```javascript
 var Rihawk = require('rihawk');
@@ -31,7 +33,9 @@ var client = new Rihawk({
 - **bucket**: The bucket to query
 - **key**: The key to return a value for
 - **options**: The riak pbc request options
+
 **Response**: An instance of the Get response stream.
+
 **Example**:
 ```javascript
 var request = client.get('nfl_team', 'CHI')
