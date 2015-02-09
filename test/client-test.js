@@ -9,8 +9,19 @@ var Client = require('../lib/client');
 describe('Client', function() {
   var Get = require('../lib/streams/get');
   it('get(bucket,key)', function(done) {
+    new Client({
+        host: '192.168.1.136'
+      }).get('nfl_team', 'CHI')
+      .on('data', function(data) {
+        console.log('#DATA', data);
+      })
+      .on('error', function(error) {
+        console.log('#ERROR', error);
+      }).on('end', function() {
+        console.log('#END');
+      });
 
-    new Client().get('nfl_team', 'MIA').on('data', function(data) {
+    new Client({}).get('nfl_team', 'MIA').on('data', function(data) {
       console.log('#data', data);
     }).on('error', function(err) {
       console.log('#error', data);
@@ -20,8 +31,7 @@ describe('Client', function() {
     });
   });
   it('get(bucket,[key])', function(done) {
-    new Client().get('nfl_team', ['SD', 'MIA', 'CHI', 'OAK', 'FAKETEAM', 'ATL']
-    ).on('data', function(data) {
+    new Client().get('nfl_team', ['SD', 'MIA', 'CHI', 'OAK', 'FAKETEAM', 'ATL']).on('data', function(data) {
       console.log('#data', data);
     }).on('error', function(err) {
       console.log('#error', err);
@@ -30,10 +40,9 @@ describe('Client', function() {
       done();
     });
   });
-  
+
   it('get([bucket],[key])', function(done) {
-    new Client().get(['nfl_team', 'fake_bucket'], ['SD', 'MIA', 'CHI', 'OAK', 'FAKETEAM', 'ATL']
-    ).on('data', function(data) {
+    new Client().get(['nfl_team', 'fake_bucket'], ['SD', 'MIA', 'CHI', 'OAK', 'FAKETEAM', 'ATL']).on('data', function(data) {
       console.log('#data', data);
     }).on('error', function(err) {
       console.log('#error', err);
