@@ -11,7 +11,7 @@ Returns a new instance of the Rihawk client.
 **Parameters:**
 - **options**: [riakpbc options](https://github.com/nlf/riakpbc/blob/master/lib/options.js)
 
-**Returns**: A new instance of the Rihawk client.
+**Returns**: a new instance of the Rihawk client.
 
 **Example**:
 ```javascript
@@ -35,7 +35,7 @@ var client = new Rihawk({
 - **key**: The key to return a value for
 - **options**: The riak pbc request options
 
-**Returns**: An instance of the Get stream.
+**Returns**: a readable stream emitting data events for each found value.
 
 **Example**:
 ```javascript
