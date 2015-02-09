@@ -1,4 +1,5 @@
-# Rihawk 0.0.1 - CURRENTLY IN PROGRESS
+_CURRENTLY IN PROGRESS_
+# Rihawk 0.0.1
 A streaming riakpbc wrapper with advanced features. 
 
 #API
@@ -8,7 +9,7 @@ A streaming riakpbc wrapper with advanced features.
 Returns a new instance of the Rihawk client.
 
 **Parameters:**
-- **options**: [riakpbc Options](https://github.com/nlf/riakpbc/blob/master/lib/options.js)
+- **options**: [riakpbc options](https://github.com/nlf/riakpbc/blob/master/lib/options.js)
 
 **Response**: A new instance of the Rihawk client.
 
