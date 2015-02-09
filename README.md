@@ -31,47 +31,47 @@ var client = new Rihawk({
 ### `client.get(bucket, key, options)`
 
 **parameters:** 
-- **bucket**: The bucket to query
-- **key**: The key to return a value for
-- **options**: The riak pbc request options
+- **bucket**: A string, or an array of strings containing the bucket to query.
+- **key**: A string, or an array of strings containing keys to return values for.
+- **options**: The options for the RiakPBC request.
 
 **returns**: a readable stream emitting data events for each found value.
 
 **get(bucket, key, options)**
 ```javascript
 var request = client.get('nfl_team', 'CHI')
-  .on('data', function(data) {
-    console.log('#DATA', data);
-  })
-  .on('error', function(error) {
-    console.log('#ERROR', error);
-  }).on('end', function() {
-    console.log('#END');
-  });
+.on('data', function(data) {
+  console.log('#DATA', data);
+})
+.on('error', function(error) {
+  console.log('#ERROR', error);
+}).on('end', function() {
+  console.log('#END');
+});
 ```
 
 **get(bucket, [key], options)**
 ```javascript
 var request = client.get('nfl_team', ['CHI', 'MIA', 'SD'])
-  .on('data', function(data) {
-    console.log('#DATA', data);
-  })
-  .on('error', function(error) {
-    console.log('#ERROR', error);
-  }).on('end', function() {
-    console.log('#END');
-  });
+.on('data', function(data) {
+  console.log('#DATA', data);
+})
+.on('error', function(error) {
+  console.log('#ERROR', error);
+}).on('end', function() {
+  console.log('#END');
+});
 ```
 
 **get([bucket], [key], options)**
 ```javascript
 var request = client.get(['nfl_team', 'baseball_team'], ['CHI', 'MIA', 'SD'])
-  .on('data', function(data) {
-    console.log('#DATA', data);
-  })
-  .on('error', function(error) {
-    console.log('#ERROR', error);
-  }).on('end', function() {
-    console.log('#END');
-  });
+.on('data', function(data) {
+  console.log('#DATA', data);
+})
+.on('error', function(error) {
+  console.log('#ERROR', error);
+}).on('end', function() {
+  console.log('#END');
+});
 ```
