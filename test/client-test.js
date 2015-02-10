@@ -8,6 +8,16 @@ var riak = RiakPBC.createClient();
 var Client = require('../lib/client');
 describe('Client', function() {
   var Get = require('../lib/streams/get');
+    it('put(bucket,key)', function(done) {
+    new Client({}).put('test_data', 'A', { name: 'Albert Ainstein'}).on('data', function(data) {
+      console.log('#data', data);
+    }).on('error', function(err) {
+      console.log('#error', err);
+    }).on('end', function() {
+      console.log('#end');
+      done();
+    });
+  });
   it('get(bucket,key)', function(done) {
     new Client({}).get('nfl_team', 'MIA').on('data', function(data) {
       console.log('#data', data);
