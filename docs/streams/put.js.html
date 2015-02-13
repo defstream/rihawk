@@ -98,11 +98,125 @@
           </ul>
           <div class="scrollspy">
             <ul class="nav nav-list bs-docs-sidenav affix-top">
+              <li><a href="#next"><i class="alert alert-info"></i><span>next</span></a>
+              </li>
+              <li><a href="#_read"><i class="alert alert-info"></i><span>_read</span></a>
+              </li>
             </ul>
           </div>
         </div>
         <div class="span9">
-          <div class="description"> </div>
+          <section id="next">
+            <h1>next</h1>
+            <h5 class="subheader"></h5>
+            <p>
+              <div class="label label-info radius ctx-type">method</div><span>Put.prototype.next()</span> -><span>Array</span>
+            </p>
+          </section>
+          <table class="table table-bordered table-striped">
+            <thead>
+              <tr>
+                <th style="width:20%">Option name</th>
+                <th style="width:20%">Type</th>
+                <th>Description</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>limit</td>
+                <td>Number</td>
+                <td><p>How many items to return</p></td>
+              </tr>
+              <tr>
+                <td>return</td>
+                <td>Array</td>
+                <td></td>
+              </tr>
+            </tbody>
+          </table>
+          <div class="description"><p>returns the next data available for writting</p> </div>
+          <pre><code class="language-javascript">Put.prototype.next = function(limit) {
+  var self = this;
+  var results = [];
+  for (var i = 0; i &lt; (limit || self.concurrent || 1); i++) {
+    if (++self.currentValue &gt;= self.value.length) {
+      if (++self.currentKey &gt;= self.key.length) {
+        if (++self.currentBucket &gt;= self.bucket.length) {
+          return null;
+        } else {
+          self.currentKey = 0;
+        }
+      }
+    }
+    results.push({
+      bucket: self.bucket[self.currentBucket],
+      key: self.key[self.currentKey],
+      value: self.value[self.currentValue]
+    });
+  }
+  return results;
+};</code></pre>
+          <section id="_read">
+            <h1>_read</h1>
+            <h5 class="subheader"></h5>
+            <p>
+              <div class="label label-info radius ctx-type">method</div><span>Put.prototype._read()</span>
+            </p>
+          </section>
+          <div class="description"><p>gets the next set of data to read and performs the request on the client.</p> </div>
+          <pre><code class="language-javascript">Put.prototype._read = function() {
+  var self = this;
+  if (self.paused) {
+    return;
+  }
+  var results = [];
+  var set = self.next(); // returns multiple
+  if (!set) {
+    self.push(null);
+    return;
+  }
+  async.each(set, function(current, done) {
+    if (current) {
+      self.client.put({
+        key: current.key, 
+        bucket: current.bucket,
+        content: {
+          value: JSON.stringify(current.value),
+          content_type: 'application/json'
+        },
+        return_body: true
+      }).on('data', function(data) {
+        results.push({
+          bucket: current.bucket,
+          key: current.key,
+          vclock: data.vclock,
+          content: data.content
+        });
+      }).on('error', function(err) {
+        self.emit('error', err);
+      }).on('end', function() {
+        done();
+      });
+    } else {
+      done();
+    }
+  },
+  function(err) {
+    if (err) {
+      self.emit('error', err);
+    } else if (!results.length) {
+      self._read();
+    } else {
+      results.forEach(function(result) {
+        self.push(result);
+      });
+    }
+  });
+};
+
+module.exports = function(options) {
+  return new Put(options);
+};</code></pre>
         </div>
       </div>
     </div>

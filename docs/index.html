@@ -102,32 +102,62 @@
           </div>
         </div>
         <div class="span9">
-          <section id="Main"><h1>Rihawk 0.0.1 - CURRENTLY IN PROGRESS</h1>
+          <section id="Main"><p><em>CURRENTLY IN PROGRESS</em></p><h1>Rihawk 0.0.1</h1>
 <p>A streaming riakpbc wrapper with advanced features. </p><h1>API</h1>
 <h3><code>new Rihawk(options)</code></h3>
-<p>Returns a new instance of the Rihawk client.</p><p><strong>Parameters:</strong></p><ul>
-<li><strong>options</strong>: <a href="https://github.com/nlf/riakpbc/blob/master/lib/options.js">riakpbc Options</a><br /><strong>Response</strong>: A new instance of the Rihawk client.<br /><strong>Example</strong>:<br />```javascript<br />var Rihawk = require(&#39;rihawk&#39;);</li>
+<p>Returns a new instance of the Rihawk client.</p><p><strong>parameters:</strong></p><ul>
+<li><strong>options</strong>: <a href="https://github.com/nlf/riakpbc/blob/master/lib/options.js">riakpbc options</a></li>
 </ul>
-<p>var client = new Rihawk({<br />  host: &#39;127.0.0.1&#39;,<br />  port: 8087,<br />  connectTimeout: 1000,<br />  idleTimeout: 30000,<br />  maxLifetime: 500000,<br />  minConnections: 3,<br />  maxConnections: 12,<br />  parseValues: true<br />});</p><pre><code>
-### `client.get(bucket, key, options)`
-**Parameters:** 
-- **bucket**: The bucket to query
-- **key**: The key to return a value for
-- **options**: The riak pbc request options
-**Response**: An instance of the Get response stream.
-**Example**:
-```javascript
-var request = 
-client.get(&#39;nfl_team&#39;, &#39;CHI&#39;)
-  .on(&#39;data&#39;, function(data) {
-    console.log(&#39;#DATA&#39;, data);
-  })
-  .on(&#39;error&#39;, function(error) {
-    console.log(&#39;#ERROR&#39;, error);
-  }).on(&#39;end&#39;, function() {
-    console.log(&#39;#END&#39;);
-  });
-</code></pre></section>
+<p><strong>returns</strong>: a new instance of the Rihawk client.</p><pre><code class="lang-javascript">var Rihawk = require(&#39;rihawk&#39;);
+
+var client = new Rihawk({
+  host: &#39;127.0.0.1&#39;,
+  port: 8087,
+  connectTimeout: 1000,
+  idleTimeout: 30000,
+  maxLifetime: 500000,
+  minConnections: 3,
+  maxConnections: 12,
+  parseValues: true
+});
+</code></pre>
+<h3><code>client.get(bucket, key, options)</code></h3>
+<p><strong>parameters:</strong> </p><ul>
+<li><strong>bucket</strong>: A string, or an array of strings containing the bucket to query.</li>
+<li><strong>key</strong>: A string, or an array of strings containing keys to return values for.</li>
+<li><strong>options</strong>: The options for the RiakPBC request.</li>
+</ul>
+<p><strong>returns</strong>: a readable stream emitting data events for each found value.</p><p><strong>get(bucket, key, options)</strong></p><pre><code class="lang-javascript">var request = client.get(&#39;nfl_team&#39;, &#39;CHI&#39;)
+.on(&#39;data&#39;, function(data) {
+  console.log(&#39;#DATA&#39;, data);
+})
+.on(&#39;error&#39;, function(error) {
+  console.log(&#39;#ERROR&#39;, error);
+}).on(&#39;end&#39;, function() {
+  console.log(&#39;#END&#39;);
+});
+</code></pre>
+<p><strong>get(bucket, [key], options)</strong></p><pre><code class="lang-javascript">var request = client.get(&#39;nfl_team&#39;, [&#39;CHI&#39;, &#39;MIA&#39;, &#39;SD&#39;])
+.on(&#39;data&#39;, function(data) {
+  console.log(&#39;#DATA&#39;, data);
+})
+.on(&#39;error&#39;, function(error) {
+  console.log(&#39;#ERROR&#39;, error);
+}).on(&#39;end&#39;, function() {
+  console.log(&#39;#END&#39;);
+});
+</code></pre>
+<p><strong>get([bucket], [key], options)</strong></p><pre><code class="lang-javascript">var request = client.get([&#39;nfl_team&#39;, &#39;baseball_team&#39;], [&#39;CHI&#39;, &#39;MIA&#39;, &#39;SD&#39;])
+.on(&#39;data&#39;, function(data) {
+  console.log(&#39;#DATA&#39;, data);
+})
+.on(&#39;error&#39;, function(error) {
+  console.log(&#39;#ERROR&#39;, error);
+}).on(&#39;end&#39;, function() {
+  console.log(&#39;#END&#39;);
+});
+</code></pre>
+</section>
         </div>
       </div>
     </div>

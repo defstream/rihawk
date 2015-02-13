@@ -102,6 +102,10 @@
               </li>
               <li><a href="#get"><i class="alert alert-info"></i><span>get</span></a>
               </li>
+              <li><a href="#getIndex"><i class="alert alert-info"></i><span>getIndex</span></a>
+              </li>
+              <li><a href="#put"><i class="alert alert-info"></i><span>put</span></a>
+              </li>
               <li><a href="#streams"><i class="alert alert-success"></i><span>streams</span></a>
               </li>
               <li><a href="#exports"><i class="alert alert-info"></i><span>exports</span></a>
@@ -129,7 +133,7 @@
               <tr>
                 <td>options</td>
                 <td>Object</td>
-                <td>&lt;p&gt;RiakPBC options.&lt;/p&gt;</td>
+                <td><p>RiakPBC options.</p></td>
               </tr>
             </tbody>
           </table>
@@ -158,18 +162,23 @@
             <tbody>
               <tr>
                 <td>bucket</td>
-                <td>String</td>
-                <td>&lt;p&gt;the bucket to query&lt;/p&gt;</td>
+                <td></td>
+                <td><p>the bucket to query.</p></td>
               </tr>
               <tr>
                 <td>key</td>
-                <td>String</td>
-                <td>&lt;p&gt;the key to return a value for.&lt;/p&gt;</td>
+                <td></td>
+                <td><p>the key to return a value for.</p></td>
               </tr>
               <tr>
                 <td>options</td>
                 <td>Object</td>
-                <td>&lt;p&gt;riakpbc options&lt;/p&gt;</td>
+                <td><p>riakpbc options.</p></td>
+              </tr>
+              <tr>
+                <td>return</td>
+                <td>Stream</td>
+                <td></td>
               </tr>
             </tbody>
           </table>
@@ -182,6 +191,112 @@
     key: key
   });
 };</code></pre>
+          <section id="getIndex">
+            <h1>getIndex</h1>
+            <h5 class="subheader"></h5>
+            <p>
+              <div class="label label-info radius ctx-type">method</div><span>Client.prototype.getIndex()</span> -><span>Stream</span>
+            </p>
+          </section>
+          <table class="table table-bordered table-striped">
+            <thead>
+              <tr>
+                <th style="width:20%">Option name</th>
+                <th style="width:20%">Type</th>
+                <th>Description</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>bucket</td>
+                <td></td>
+                <td><p>A string, or an array of strings containing the bucket to query.</p></td>
+              </tr>
+              <tr>
+                <td>index</td>
+                <td></td>
+                <td><p>A string, or an array of strings containing index to query values for.</p></td>
+              </tr>
+              <tr>
+                <td>value</td>
+                <td></td>
+                <td><p>A string or an array of strings containg values the index must match.</p></td>
+              </tr>
+              <tr>
+                <td>options</td>
+                <td>Object</td>
+                <td><p>riakpbc options.</p></td>
+              </tr>
+              <tr>
+                <td>return</td>
+                <td>Stream</td>
+                <td></td>
+              </tr>
+            </tbody>
+          </table>
+          <div class="description"><p>Returns all values matching the index value for the specified bucket.</p> </div>
+          <pre><code class="language-javascript">Client.prototype.getIndex = function(bucket, index, value, options) {
+  return this.streams.GetIndex({
+    client: this.client,
+    options: options,
+    bucket: bucket,
+    index: index,
+    value: value
+  });
+};</code></pre>
+          <section id="put">
+            <h1>put</h1>
+            <h5 class="subheader"></h5>
+            <p>
+              <div class="label label-info radius ctx-type">method</div><span>Client.prototype.put()</span> -><span>type</span>
+            </p>
+          </section>
+          <table class="table table-bordered table-striped">
+            <thead>
+              <tr>
+                <th style="width:20%">Option name</th>
+                <th style="width:20%">Type</th>
+                <th>Description</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>bucket</td>
+                <td></td>
+                <td><p>A string or an array of strings for each bucket to place a value for.</p></td>
+              </tr>
+              <tr>
+                <td>key</td>
+                <td>String</td>
+                <td><p>A string or an array of string for each key.</p></td>
+              </tr>
+              <tr>
+                <td>value</td>
+                <td>type</td>
+                <td><p>A string or an array of string for each.</p></td>
+              </tr>
+              <tr>
+                <td>options</td>
+                <td>type</td>
+                <td><p>[description]</p></td>
+              </tr>
+              <tr>
+                <td>return</td>
+                <td>type</td>
+                <td></td>
+              </tr>
+            </tbody>
+          </table>
+          <div class="description"><p>Puts the value into the bucket for the given key.</p> </div>
+          <pre><code class="language-javascript">Client.prototype.put = function(bucket, key, value, options) {
+  return this.streams.Put({
+    client: this.client,    
+    bucket: bucket,
+    key: key,
+    value: value,
+    options: options
+  });
+};</code></pre>
           <section id="streams">
             <h1>streams</h1>
             <h5 class="subheader"></h5>
@@ -191,7 +306,9 @@
           </section>
           <div class="description"><p>All Riak API / Stream Interfaces.</p> </div>
           <pre><code class="language-javascript">Client.prototype.streams = {
-  Get: require('./streams/get')
+  Get: require('./streams/get'),
+  GetIndex: require('./streams/getIndex'),
+  Put : require('./streams/put')
 };</code></pre>
           <section id="exports">
             <h1>exports</h1>
@@ -212,7 +329,12 @@
               <tr>
                 <td>options</td>
                 <td>Object</td>
-                <td>&lt;p&gt;RiakPBC options.&lt;/p&gt;</td>
+                <td><p>RiakPBC options.</p></td>
+              </tr>
+              <tr>
+                <td>return</td>
+                <td>Client</td>
+                <td></td>
               </tr>
             </tbody>
           </table>
