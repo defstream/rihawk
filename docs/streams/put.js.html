@@ -125,12 +125,7 @@
               <tr>
                 <td>limit</td>
                 <td>Number</td>
-                <td><p>How many items to return</p></td>
-              </tr>
-              <tr>
-                <td>return</td>
-                <td>Array</td>
-                <td></td>
+                <td>&lt;p&gt;How many items to return&lt;/p&gt;</td>
               </tr>
             </tbody>
           </table>
@@ -180,10 +175,10 @@
       self.client.put({
         key: current.key,
         bucket: current.bucket,
+        return_body: self.options.return_body || true,
         vclock: self.options.vclock,
         w: self.options.w,
         dw: self.options.dw,
-        return_body: self.options.vclock,
         pw: self.options.pw,
         if_not_modified: self.options.if_not_modified,
         if_none_match: self.options.if_none_match,
