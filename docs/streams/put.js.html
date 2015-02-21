@@ -188,7 +188,7 @@
       }).on('data', function(data) {
         results.push({
           bucket: current.bucket,
-          key: data.key,
+          key: data.key || current.key,
           vclock: data.vclock,
           content: data.content
         });
