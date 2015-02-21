@@ -281,42 +281,49 @@
     self.push(null);
     return;
   }
+
   async.each(set, function(current, done) {
-    if (current) {
-      self.client.getIndex({
-        bucket: current.bucket,
-        index: current.index,
-        key: current.value,
-        return_terms: true,
-        stream: true,
-        qtype: 0
-      }).on('data', function(data) {
-        results.push({
+      if (current) {
+        self.client.getIndex({
           bucket: current.bucket,
           index: current.index,
-          value: current.value,
-          keys: data.keys
+          key: current.value,
+          qtype: 0,          
+          return_terms: self.options.return_terms || true,
+          stream: self.options.stream || true,
+          max_results: self.options.max_results,
+          continuation: self.options.continuation,
+          timeout: self.options.timeout,
+          type: self.options.type,
+          term_regex: self.options.term_regex,
+          pagination_sort: self.options.pagination_sort
+        }).on('data', function(data) {
+          results.push({
+            bucket: current.bucket,
+            index: current.index,
+            value: current.value,
+            keys: data.keys
+          });
+        }).on('error', function(err) {
+          self.emit('error', err);
+        }).on('end', function() {
+          done();
         });
-      }).on('error', function(err) {
-        self.emit('error', err);
-      }).on('end', function() {
+      } else {
         done();
-      });
-    } else {
-      done();
-    }
-  },
-  function(err) {
-    if (err) {
-      self.emit('error', err);
-    } else if (!results.length) {
-      self._read();
-    } else {
-      results.forEach(function(result) {
-        self.push(result);
-      });
-    }
-  });
+      }
+    },
+    function(err) {
+      if (err) {
+        self.emit('error', err);
+      } else if (!results.length) {
+        self._read();
+      } else {
+        results.forEach(function(result) {
+          self.push(result);
+        });
+      }
+    });
 };</code></pre>
           <section id="exports">
             <h1>exports</h1>

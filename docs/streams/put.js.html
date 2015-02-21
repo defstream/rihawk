@@ -178,13 +178,26 @@
   async.each(set, function(current, done) {
     if (current) {
       self.client.put({
-        key: current.key, 
+        key: current.key,
         bucket: current.bucket,
+        vclock: self.options.vclock,
+        w: self.options.w,
+        dw: self.options.dw,
+        return_body: self.options.vclock,
+        pw: self.options.pw,
+        if_not_modified: self.options.if_not_modified,
+        if_none_match: self.options.if_none_match,
+        return_head: self.options.return_head,
+        timeout: self.options.timeout,
+        asis: self.options.asis,
+        sloppy_quorum: self.options.sloppy_quorum,
+        n_val: self.options.n_val,
+        type: self.options.type,
         content: {
           value: JSON.stringify(current.value),
-          content_type: 'application/json'
-        },
-        return_body: true
+          content_type: 'application/json',
+          indexes: self.options.indexes
+        }
       }).on('data', function(data) {
         results.push({
           bucket: current.bucket,
@@ -211,7 +224,7 @@
         self.push(result);
       });
     }
-  });
+  }); 
 };
 
 module.exports = function(options) {

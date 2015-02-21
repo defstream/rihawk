@@ -135,69 +135,69 @@
           </table>
           <div class="description"><p>Gets values from a Riak bucket by keyname.</p> </div>
           <pre><code class="language-javascript">function Get(options) {
-  if (missing.options(options, ['client', 'bucket', 'key'], this))
-    return;
+    if (missing.options(options, ['client', 'bucket', 'key'], this))
+      return;
 
-  options.objectMode = true;
+    options.objectMode = true;
 
-  Readable.call(this, options);
+    Readable.call(this, options);
 
-  Object.defineProperty(this, 'client', {
-    enumerable: true,
-    value: options.client
-  });
-
-  Object.defineProperty(this, 'bucket', {
-    enumerable: true,
-    value: [].concat(options.bucket)
-  });
-
-  Object.defineProperty(this, 'key', {
-    enumerable: true,
-    value: [].concat(options.key)
-  });
-
-  Object.defineProperty(this, 'options', {
-    enumerable: true,
-    value: options.options || Object.create(null)
-  });
-
-  Object.defineProperty(this, 'concurrent', {
-    enumerable: true,
-    value: options.concurrent || 1
-  });
-
-  Object.defineProperty(this, 'endOnError', {
-    value: false
-  });
-
-  Object.defineProperty(this, 'currentBucket', {
-    writable: true,
-    value: 0
-  });
-
-  Object.defineProperty(this, 'currentKey', {
-    writable: true,
-    value: -1
-  });
-
-  Object.defineProperty(this, 'paused', {
-    writable: true,
-    value: false
-  });
-
-  (function(self) {
-    self.on('pause', function() {
-      self.paused = true;
+    Object.defineProperty(this, 'client', {
+      enumerable: true,
+      value: options.client
     });
 
-    self.on('resume', function() {
-      self.paused = false;
-      self._read();
+    Object.defineProperty(this, 'bucket', {
+      enumerable: true,
+      value: [].concat(options.bucket)
     });
-  })(this);
 
-}</code></pre>
+    Object.defineProperty(this, 'key', {
+      enumerable: true,
+      value: [].concat(options.key)
+    });
+
+    Object.defineProperty(this, 'options', {
+      enumerable: true,
+      value: options.options || Object.create(null)
+    });
+
+    Object.defineProperty(this, 'concurrent', {
+      enumerable: true,
+      value: options.concurrent || 1
+    });
+
+    Object.defineProperty(this, 'endOnError', {
+      value: false
+    });
+
+    Object.defineProperty(this, 'currentBucket', {
+      writable: true,
+      value: 0
+    });
+
+    Object.defineProperty(this, 'currentKey', {
+      writable: true,
+      value: -1
+    });
+
+    Object.defineProperty(this, 'paused', {
+      writable: true,
+      value: false
+    });
+
+    (function(self) {
+      self.on('pause', function() {
+        self.paused = true;
+      });
+
+      self.on('resume', function() {
+        self.paused = false;
+        self._read();
+      });
+    })(this);
+
+  }</code></pre>
           <section id="next">
             <h1>next</h1>
             <h5 class="subheader"></h5>
@@ -268,7 +268,18 @@
     if (current) {
       self.client.get({
         bucket: current.bucket,
-        key: current.key
+        key: current.key,
+        r: self.options.r,
+        pr: self.options.pr,
+        basic_quorum: self.options.basic_quorum,
+        notfound_ok: self.options.notfound_ok,
+        if_modified: self.options.if_modified,
+        head: self.options.head,
+        deletedvclock: self.options.deletedvclock,
+        timeout: self.options.timeout,
+        sloppy_quorum: self.options.sloppy_quorum,
+        n_val: self.options.n_val,
+        type: self.options.type
       }).on('data', function(data) {
         results.push({
           bucket: current.bucket,
@@ -284,8 +295,7 @@
     } else {
       done();
     }
-  },
-  function(err) {
+  }, function(err) {
     if (err) {
       self.emit('error', err);
     } else if (!results.length) {
