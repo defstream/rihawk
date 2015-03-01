@@ -1,7 +1,7 @@
 {
   "name": "rihawk",
   "description": "A streaming riakpbc wrapper with advanced features",
-  "version": "0.0.5",
+  "version": "0.0.6",
   "homepage": "https://github.com/defstream/rihawk",
   "bugs": "https://github.com/defstream/rihawk/issues",
   "author": {
@@ -30,5 +30,8 @@
   "scripts": {
     "test": "mocha test",
     "prepublish": "doxx -s lib -t docs"
-  }
+  },
+  "publishConfig": {
+    "registry": "http://registry.npmjs.org"
+  }  
 }
