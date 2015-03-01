@@ -106,6 +106,14 @@
               </li>
               <li><a href="#put"><i class="alert alert-info"></i><span>put</span></a>
               </li>
+              <li><a href="#putCrdt"><i class="alert alert-info"></i><span>putCrdt</span></a>
+              </li>
+              <li><a href="#getCrdt"><i class="alert alert-info"></i><span>getCrdt</span></a>
+              </li>
+              <li><a href="#updateCounter"><i class="alert alert-info"></i><span>updateCounter</span></a>
+              </li>
+              <li><a href="#getCounter"><i class="alert alert-success"></i><span>getCounter</span></a>
+              </li>
               <li><a href="#streams"><i class="alert alert-success"></i><span>streams</span></a>
               </li>
               <li><a href="#exports"><i class="alert alert-info"></i><span>exports</span></a>
@@ -139,11 +147,11 @@
           </table>
           <div class="description"><p>A Streaming Riak Client with advanced features...</p> </div>
           <pre><code class="language-javascript">function Client(options) {
-  Object.defineProperty(this, 'client', {
-    enumerable: true,
-    value: RiakPBC.createClient(options)
-  });
-}</code></pre>
+    Object.defineProperty(this, 'client', {
+      enumerable: true,
+      value: RiakPBC.createClient(options)
+    });
+  }</code></pre>
           <section id="get">
             <h1>get</h1>
             <h5 class="subheader"></h5>
@@ -290,13 +298,210 @@
           <div class="description"><p>Puts the value into the bucket for the given key.</p> </div>
           <pre><code class="language-javascript">Client.prototype.put = function(bucket, key, value, options) {
   return this.streams.Put({
-    client: this.client,    
+    client: this.client,
     bucket: bucket,
     key: key,
     value: value,
     options: options
   });
 };</code></pre>
+          <section id="putCrdt">
+            <h1>putCrdt</h1>
+            <h5 class="subheader"></h5>
+            <p>
+              <div class="label label-info radius ctx-type">method</div><span>Client.prototype.putCrdt()</span> -><span>Stream</span>
+            </p>
+          </section>
+          <table class="table table-bordered table-striped">
+            <thead>
+              <tr>
+                <th style="width:20%">Option name</th>
+                <th style="width:20%">Type</th>
+                <th>Description</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>bucket</td>
+                <td>String</td>
+                <td><p>A string or an array of strings for each bucket to place a value for.</p></td>
+              </tr>
+              <tr>
+                <td>key</td>
+                <td>String</td>
+                <td><p>A string or an array of string for each key.</p></td>
+              </tr>
+              <tr>
+                <td>op</td>
+                <td>Object</td>
+                <td><p>An object or an array of array of objects for each CRDT to update.</p></td>
+              </tr>
+              <tr>
+                <td>options</td>
+                <td>Object</td>
+                <td><p>riakpbc options.</p></td>
+              </tr>
+              <tr>
+                <td>return</td>
+                <td>Stream</td>
+                <td></td>
+              </tr>
+            </tbody>
+          </table>
+          <div class="description"><p>Puts the CRDT into the bucket for the given key.</p> </div>
+          <pre><code class="language-javascript">Client.prototype.putCrdt = function(bucket, key, op, options) {
+  return this.streams.PutCrdt({
+    client: this.client,
+    bucket: bucket,
+    key: key,
+    op: op,
+    options: options
+  });
+};</code></pre>
+          <section id="getCrdt">
+            <h1>getCrdt</h1>
+            <h5 class="subheader"></h5>
+            <p>
+              <div class="label label-info radius ctx-type">method</div><span>Client.prototype.getCrdt()</span> -><span>Stream</span>
+            </p>
+          </section>
+          <table class="table table-bordered table-striped">
+            <thead>
+              <tr>
+                <th style="width:20%">Option name</th>
+                <th style="width:20%">Type</th>
+                <th>Description</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>bucket</td>
+                <td>String</td>
+                <td><p>the bucket to query.</p></td>
+              </tr>
+              <tr>
+                <td>key</td>
+                <td>String</td>
+                <td><p>the key to return a CRDT for.</p></td>
+              </tr>
+              <tr>
+                <td>options</td>
+                <td>Object</td>
+                <td><p>riakpbc options.</p></td>
+              </tr>
+              <tr>
+                <td>return</td>
+                <td>Stream</td>
+                <td></td>
+              </tr>
+            </tbody>
+          </table>
+          <div class="description"><p>Returns a CRDT from a bucket for a given key.</p> </div>
+          <pre><code class="language-javascript">Client.prototype.getCrdt = function(bucket, key, options) {
+  return this.streams.GetCrdt({
+    client: this.client,
+    options: options,
+    bucket: bucket,
+    key: key
+  });
+};</code></pre>
+          <section id="updateCounter">
+            <h1>updateCounter</h1>
+            <h5 class="subheader"></h5>
+            <p>
+              <div class="label label-info radius ctx-type">method</div><span>Client.prototype.updateCounter()</span> -><span>Stream</span>
+            </p>
+          </section>
+          <table class="table table-bordered table-striped">
+            <thead>
+              <tr>
+                <th style="width:20%">Option name</th>
+                <th style="width:20%">Type</th>
+                <th>Description</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>bucket</td>
+                <td>String</td>
+                <td><p>the bucket to query.</p></td>
+              </tr>
+              <tr>
+                <td>key</td>
+                <td>String</td>
+                <td><p>the key to update a counter for.</p></td>
+              </tr>
+              <tr>
+                <td>Number</td>
+                <td>String</td>
+                <td><p>the negative or positve value to apply to the counter.</p></td>
+              </tr>
+              <tr>
+                <td>options</td>
+                <td>Object</td>
+                <td><p>riakpbc options.</p></td>
+              </tr>
+              <tr>
+                <td>return</td>
+                <td>Stream</td>
+                <td></td>
+              </tr>
+            </tbody>
+          </table>
+          <div class="description"><p>Updates a counter for a bucket for a given key.c</p> </div>
+          <pre><code class="language-javascript">Client.prototype.updateCounter = function(bucket, key, value, options) {
+  return this.streams.PutCrdt({
+    client: this.client,
+    bucket: bucket,
+    key: key,
+    op: {
+      counter_op: {
+        increment: value
+      }
+    },
+    options: options
+  });
+};</code></pre>
+          <section id="getCounter">
+            <h1>getCounter</h1>
+            <h5 class="subheader"></h5>
+            <p>
+              <div class="label label-success radius ctx-type">property</div><span>Client.prototype.getCounter</span> -><span>Stream</span>
+            </p>
+          </section>
+          <table class="table table-bordered table-striped">
+            <thead>
+              <tr>
+                <th style="width:20%">Option name</th>
+                <th style="width:20%">Type</th>
+                <th>Description</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>bucket</td>
+                <td>String</td>
+                <td><p>the bucket to query.</p></td>
+              </tr>
+              <tr>
+                <td>key</td>
+                <td>String</td>
+                <td><p>the key to return a counter for.</p></td>
+              </tr>
+              <tr>
+                <td>options</td>
+                <td>Object</td>
+                <td><p>riakpbc options.</p></td>
+              </tr>
+              <tr>
+                <td>return</td>
+                <td>Stream</td>
+                <td></td>
+              </tr>
+            </tbody>
+          </table>
+          <div class="description"><p>Returns a counter for a bucket from a given key.</p> </div>
+          <pre><code class="language-javascript">Client.prototype.getCounter = Client.prototype.getCrdt;</code></pre>
           <section id="streams">
             <h1>streams</h1>
             <h5 class="subheader"></h5>
@@ -307,8 +512,10 @@
           <div class="description"><p>All Riak API / Stream Interfaces.</p> </div>
           <pre><code class="language-javascript">Client.prototype.streams = {
   Get: require('./streams/get'),
+  GetCrdt: require('./streams/getCrdt'),
   GetIndex: require('./streams/getIndex'),
-  Put : require('./streams/put')
+  Put: require('./streams/put'),
+  PutCrdt: require('./streams/putCrdt')
 };</code></pre>
           <section id="exports">
             <h1>exports</h1>

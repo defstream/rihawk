@@ -1,5 +1,5 @@
 _CURRENTLY IN PROGRESS_
-# Rihawk 0.0.1
+# Rihawk 0.0.7
 A streaming riakpbc wrapper with advanced features. 
 
 #API

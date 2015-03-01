@@ -98,11 +98,225 @@
           </ul>
           <div class="scrollspy">
             <ul class="nav nav-list bs-docs-sidenav affix-top">
+              <li><a href="#GetCrdt"><i class="alert alert-info"></i><span>GetCrdt</span></a>
+              </li>
+              <li><a href="#next"><i class="alert alert-info"></i><span>next</span></a>
+              </li>
+              <li><a href="#_read"><i class="alert alert-info"></i><span>_read</span></a>
+              </li>
+              <li><a href="#exports"><i class="alert alert-info"></i><span>exports</span></a>
+              </li>
             </ul>
           </div>
         </div>
         <div class="span9">
-          <div class="description"> </div>
+          <section id="GetCrdt">
+            <h1>GetCrdt</h1>
+            <h5 class="subheader"></h5>
+            <p>
+              <div class="label label-info radius ctx-type">function</div><span>GetCrdt()</span>
+            </p>
+          </section>
+          <table class="table table-bordered table-striped">
+            <thead>
+              <tr>
+                <th style="width:20%">Option name</th>
+                <th style="width:20%">Type</th>
+                <th>Description</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>options</td>
+                <td>Object</td>
+                <td><p>The options for this GetCrdt request</p></td>
+              </tr>
+            </tbody>
+          </table>
+          <div class="description"><p>GetCrdts values from a Riak bucket by keyname.</p> </div>
+          <pre><code class="language-javascript">function GetCrdt(options) {
+    if (missing.options(options, ['client', 'bucket', 'key'], this))
+      return;
+
+    options.objectMode = true;
+
+    Readable.call(this, options);
+
+    Object.defineProperty(this, 'client', {
+      enumerable: true,
+      value: options.client
+    });
+
+    Object.defineProperty(this, 'bucket', {
+      enumerable: true,
+      value: [].concat(options.bucket)
+    });
+
+    Object.defineProperty(this, 'key', {
+      enumerable: true,
+      value: [].concat(options.key)
+    });
+
+    Object.defineProperty(this, 'options', {
+      enumerable: true,
+      value: options.options || Object.create(null)
+    });
+
+    Object.defineProperty(this, 'concurrent', {
+      enumerable: true,
+      value: options.concurrent || 1
+    });
+
+    Object.defineProperty(this, 'endOnError', {
+      value: false
+    });
+
+    Object.defineProperty(this, 'currentBucket', {
+      writable: true,
+      value: 0
+    });
+
+    Object.defineProperty(this, 'currentKey', {
+      writable: true,
+      value: -1
+    });
+
+    Object.defineProperty(this, 'paused', {
+      writable: true,
+      value: false
+    });
+
+    (function(self) {
+      self.on('pause', function() {
+        self.paused = true;
+      });
+
+      self.on('resume', function() {
+        self.paused = false;
+        self._read();
+      });
+    })(this);
+
+  }</code></pre>
+          <section id="next">
+            <h1>next</h1>
+            <h5 class="subheader"></h5>
+            <p>
+              <div class="label label-info radius ctx-type">method</div><span>GetCrdt.prototype.next()</span> -><span>Array</span>
+            </p>
+          </section>
+          <table class="table table-bordered table-striped">
+            <thead>
+              <tr>
+                <th style="width:20%">Option name</th>
+                <th style="width:20%">Type</th>
+                <th>Description</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>limit</td>
+                <td>Number</td>
+                <td><p>How many items to return</p></td>
+              </tr>
+              <tr>
+                <td>return</td>
+                <td>Array</td>
+                <td></td>
+              </tr>
+            </tbody>
+          </table>
+          <div class="description"><p>returns the next data available for writting</p> </div>
+          <pre><code class="language-javascript">GetCrdt.prototype.next = function(limit) {
+  var self = this;
+  var results = [];
+  for (var i = 0; i &lt; (limit || self.concurrent || 1); i++) {
+    if (++self.currentKey &gt;= self.key.length) {
+      if (++self.currentBucket &gt;= self.bucket.length) {
+        return null;
+      } else {
+        self.currentKey = 0;
+      }
+    }
+    results.push({
+      bucket: self.bucket[self.currentBucket],
+      key: self.key[self.currentKey]
+    });
+  }
+  return results;
+};</code></pre>
+          <section id="_read">
+            <h1>_read</h1>
+            <h5 class="subheader"></h5>
+            <p>
+              <div class="label label-info radius ctx-type">method</div><span>GetCrdt.prototype._read()</span>
+            </p>
+          </section>
+          <div class="description"><p>GetCrdts the next set of data to read and requests it from the client.</p> </div>
+          <pre><code class="language-javascript">GetCrdt.prototype._read = function() {
+  var self = this;
+  if (self.paused) {
+    return;
+  }
+  var results = [];
+  var set = self.next(); // returns multiple
+  if (!set) {
+    self.push(null);
+    return;
+  }
+  async.each(set, function(current, done) {
+    if (current) {
+      self.client.getCrdt({
+        bucket: current.bucket,
+        key: current.key,
+        r: self.options.r,
+        pr: self.options.pr,
+        basic_quorum: self.options.basic_quorum,
+        notfound_ok: self.options.notfound_ok,
+        timeout: self.options.timeout,
+        sloppy_quorum: self.options.sloppy_quorum,
+        n_val: self.options.n_val,
+        type: self.options.type,
+        include_context: self.options.include_context
+      }).on('data', function(data) {
+        results.push({
+          bucket: current.bucket,
+          key: current.key,
+          context: data.context,
+          type: data.type,
+          value: data.value
+        });
+      }).on('error', function(err) {
+        self.emit('error', err);
+      }).on('end', function() {
+        done();
+      });
+    } else {
+      done();
+    }
+  }, function(err) {
+    if (err) {
+      self.emit('error', err);
+    } else if (!results.length) {
+      self._read();
+    } else {
+      results.forEach(function(result) {
+        self.push(result);
+      });
+    }
+  });
+};</code></pre>
+          <section id="exports">
+            <h1>exports</h1>
+            <h5 class="subheader"></h5>
+            <p>
+              <div class="label label-info radius ctx-type">method</div><span>module.exports()</span>
+            </p>
+          </section>
+          <div class="description"><p>exports the GetCrdt stream @params options</p> </div>
+          <pre><code class="language-javascript">module.exports = function(options) {
+  return new GetCrdt(options);
+};</code></pre>
         </div>
       </div>
     </div>

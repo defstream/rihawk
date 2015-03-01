@@ -98,11 +98,134 @@
           </ul>
           <div class="scrollspy">
             <ul class="nav nav-list bs-docs-sidenav affix-top">
+              <li><a href="#next"><i class="alert alert-info"></i><span>next</span></a>
+              </li>
+              <li><a href="#_read"><i class="alert alert-info"></i><span>_read</span></a>
+              </li>
             </ul>
           </div>
         </div>
         <div class="span9">
-          <div class="description"> </div>
+          <section id="next">
+            <h1>next</h1>
+            <h5 class="subheader"></h5>
+            <p>
+              <div class="label label-info radius ctx-type">method</div><span>PutCrdt.prototype.next()</span> -><span>Array</span>
+            </p>
+          </section>
+          <table class="table table-bordered table-striped">
+            <thead>
+              <tr>
+                <th style="width:20%">Option name</th>
+                <th style="width:20%">Type</th>
+                <th>Description</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>limit</td>
+                <td>Number</td>
+                <td><p>How many items to return</p></td>
+              </tr>
+              <tr>
+                <td>return</td>
+                <td>Array</td>
+                <td></td>
+              </tr>
+            </tbody>
+          </table>
+          <div class="description"><p>returns the next data available for writting</p> </div>
+          <pre><code class="language-javascript">PutCrdt.prototype.next = function(limit) {
+  var self = this;
+  var results = [];
+  for (var i = 0; i &lt; (limit || self.concurrent || 1); i++) {
+    if (++self.currentOp &gt;= self.op.length) {
+      if (++self.currentKey &gt;= self.key.length) {
+        if (++self.currentBucket &gt;= self.bucket.length) {
+          return null;
+        } else {
+          self.currentKey = 0;
+        }
+      }
+    }
+    results.push({
+      bucket: self.bucket[self.currentBucket],
+      key: self.key[self.currentKey],
+      op: self.op[self.currentOp]
+    });
+  }
+  return results;
+};</code></pre>
+          <section id="_read">
+            <h1>_read</h1>
+            <h5 class="subheader"></h5>
+            <p>
+              <div class="label label-info radius ctx-type">method</div><span>PutCrdt.prototype._read()</span>
+            </p>
+          </section>
+          <div class="description"><p>gets the next set of data to read and performs the request on the client.</p> </div>
+          <pre><code class="language-javascript">PutCrdt.prototype._read = function() {
+  var self = this;
+  if (self.paused) {
+    return;
+  }
+  var results = [];
+  var set = self.next(); // returns multiple
+  if (!set) {
+    self.push(null);
+    return;
+  }
+  async.each(set, function(current, done) {
+    if (current) {
+      self.client.putCrdt({
+        key: current.key,
+        bucket: current.bucket,
+        op: current.op,
+        context: self.options.context,
+        include_context: self.options.include_context,
+        return_body: self.options.return_body || true,
+        w: self.options.w,
+        dw: self.options.dw,
+        pw: self.options.pw,
+        timeout: self.options.timeout,
+        sloppy_quorum: self.options.sloppy_quorum,
+        n_val: self.options.n_val,
+        type: self.options.type || 'default'
+      }).on('data', function(data) {
+        results.push({
+          bucket: current.bucket,
+          key: data.key || current.key,
+          context: data.context,
+          counter_value: data.counter_value,
+          set_value: data.set_value,
+          map_value: data.map_value,
+          value: data.counter_value || data.map_value || data.set_value
+        });
+      }).on('error', function(err) {
+        self.emit('error', err);
+      }).on('end', function() {
+        done();
+      });
+    } else {
+      done();
+    }
+  },
+  function(err) {
+    if (err) {
+      self.emit('error', err);
+    } else if (!results.length) {
+      self._read();
+    } else {
+      results.forEach(function(result) {
+        self.push(result);
+      });
+    }
+  }); 
+};
+
+module.exports = function(options) {
+  return new PutCrdt(options);
+};</code></pre>
         </div>
       </div>
     </div>
