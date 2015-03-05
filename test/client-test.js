@@ -69,7 +69,7 @@ describe('Client', function() {
         increment: 1
       }
     }, {
-      type: 'counters'
+      type: 'counter'
     }).on('data', function(data) {
       console.log('#data', data);
     }).on('error', function(err) {
@@ -87,7 +87,7 @@ describe('Client', function() {
         increment: 1
       }
     }, {
-      type: 'counters'
+      type: 'counter'
     }).on('data', function(data) {
       console.log('#data', data);
     }).on('error', function(err) {
@@ -100,7 +100,7 @@ describe('Client', function() {
 
 
   it('getCrdt(bucket,key)', function(done) {
-    new Client().getCrdt('nfl_teams_count', 'alls', { type: 'counters'}).on('data', function(data) {
+    new Client().getCrdt('nfl_teams_count', 'alls', { type: 'counter'}).on('data', function(data) {
       console.log('#data', data);
     }).on('error', function(err) {
       console.log('#error', err);
@@ -113,7 +113,7 @@ describe('Client', function() {
 
 
   it('getCrdt(bucket,[key])', function(done) {
-    new Client().getCrdt('nfl_teams_count', ['alls', 'everyones'], { type: 'counters'}).on('data', function(data) {
+    new Client().getCrdt('nfl_teams_count', ['alls', 'everyones'], { type: 'counter'}).on('data', function(data) {
       console.log('#data', data);
     }).on('error', function(err) {
       console.log('#error', err);
@@ -127,7 +127,7 @@ describe('Client', function() {
 
   it('updateCounter(bucket,key,value)', function(done) {
     new Client().updateCounter('nfl_teams_count', 'alls', 1, {
-      type: 'counters'
+      type: 'counter'
     }).on('data', function(data) {
       console.log('#data', data);
     }).on('error', function(err) {
@@ -140,7 +140,7 @@ describe('Client', function() {
 
   it('updateCounter(bucket,[key],value)', function(done) {
     new Client().updateCounter('nfl_teams_count', ['alls','everyones'], -1, {
-      type: 'counters'
+      type: 'counter'
     }).on('data', function(data) {
       console.log('#data', data);
     }).on('error', function(err) {
@@ -153,7 +153,7 @@ describe('Client', function() {
 
 
   it('getCounter(bucket,key)', function(done) {
-    new Client().getCounter('nfl_teams_count', 'alls', { type: 'counters'}).on('data', function(data) {
+    new Client().getCounter('nfl_teams_count', 'alls', { type: 'counter'}).on('data', function(data) {
       console.log('#data', data);
     }).on('error', function(err) {
       console.log('#error', err);
@@ -164,7 +164,7 @@ describe('Client', function() {
   });
 
   it('getCounter(bucket,[key])', function(done) {
-    new Client().getCounter('nfl_teams_count', ['alls', 'everyones'], { type: 'counters'}).on('data', function(data) {
+    new Client().getCounter('nfl_teams_count', ['alls', 'everyones'], { type: 'counter'}).on('data', function(data) {
       console.log('#data', data);
     }).on('error', function(err) {
       console.log('#error', err);
