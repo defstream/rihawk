@@ -174,27 +174,17 @@
   }
   var results = [];
   var set = self.next(); // returns multiple
-  if (!set) {
+  if (!set &amp;&amp; !self.buffer.length) {
     self.push(null);
     return;
   }
+  if (self.buffer.length) {
+    self.push(self.buffer.shift());
+    return;
+  }
+
   async.each(set, function(current, done) {
     if (current) {
-      console.log({
-        key: current.key,
-        bucket: current.bucket,
-        op: current.op,
-        context: self.options.context,
-        include_context: self.options.include_context,
-        return_body: self.options.return_body || true,
-        w: self.options.w,
-        dw: self.options.dw,
-        pw: self.options.pw,
-        timeout: self.options.timeout,
-        sloppy_quorum: self.options.sloppy_quorum,
-        n_val: self.options.n_val,
-        type: self.options.type || 'default'
-      })
       self.client.putCrdt({
         key: current.key,
         bucket: current.bucket,
@@ -231,12 +221,18 @@
   function(err) {
     if (err) {
       self.emit('error', err);
-    } else if (!results.length) {
+    } 
+    if (!results.length) {
       self._read();
     } else {
       results.forEach(function(result) {
-        self.push(result);
+        self.buffer.push(result);
       });
+      if (self.buffer.length) {
+        self.push(self.buffer.shift());
+      } else {
+        self.push(null);
+      }
     }
   }); 
 };

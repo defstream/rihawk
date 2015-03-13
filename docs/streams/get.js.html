@@ -186,6 +186,11 @@
       value: false
     });
 
+    Object.defineProperty(this, 'buffer', {
+      writable: true,
+      value: []
+    });
+
     (function(self) {
       self.on('pause', function() {
         self.paused = true;
@@ -260,10 +265,15 @@
   }
   var results = [];
   var set = self.next(); // returns multiple
-  if (!set) {
+  if (!set &amp;&amp; !self.buffer.length) {
     self.push(null);
     return;
   }
+  if (self.buffer.length) {
+    self.push(self.buffer.shift());
+    return;
+  }
+
   async.each(set, function(current, done) {
     if (current) {
       self.client.get({
@@ -298,12 +308,18 @@
   }, function(err) {
     if (err) {
       self.emit('error', err);
-    } else if (!results.length) {
+    } 
+    if (!results.length) {
       self._read();
     } else {
       results.forEach(function(result) {
-        self.push(result);
+        self.buffer.push(result);
       });
+      if (self.buffer.length) {
+        self.push(self.buffer.shift());
+      } else {
+        self.push(null);
+      }
     }
   });
 };</code></pre>
