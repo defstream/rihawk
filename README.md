@@ -1,5 +1,7 @@
 _CURRENTLY IN PROGRESS_
 # Rihawk 0.0.9
+
+[![Join the chat at https://gitter.im/defstream/rihawk](https://badges.gitter.im/defstream/rihawk.svg)](https://gitter.im/defstream/rihawk?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 A streaming riakpbc wrapper with advanced features. 
 
 #API
