@@ -19,7 +19,7 @@
   },
   "main": "lib/client.js",
   "dependencies": {
-    "neo-async": "0.5.3",
+    "neo-async": "0.6.5",
     "riakpbc": "2.1.0",
     "doxx": "1.2.5"    
   },
