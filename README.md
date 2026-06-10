@@ -1,12 +1,16 @@
 # Rihawk
 
+[![CI](https://github.com/defstream/rihawk/actions/workflows/ci.yml/badge.svg)](https://github.com/defstream/rihawk/actions/workflows/ci.yml)
+
 A streaming Riak client with advanced features, built on
-[no-riak](https://github.com/oleksiyk/no-riak).
+[no-riak](https://github.com/oleksiyk/no-riak). Written in TypeScript —
+type declarations ship with the package.
 
 Every client method accepts single values **or arrays** for its bucket/key style
 parameters and returns an object-mode readable stream that emits one record per
 response across the full combination of inputs — so fetching six keys from two
-buckets is one call and one stream.
+buckets is one call and one stream. While you process records, the next batch
+is already being fetched.
 
 ## Requirements
 
@@ -22,7 +26,11 @@ npm install rihawk
 ## Usage
 
 ```javascript
+// CommonJS
 const rihawk = require('rihawk');
+
+// ESM / TypeScript
+import rihawk, { Client } from 'rihawk';
 
 const client = rihawk({
   connectionString: '127.0.0.1:8087',
@@ -33,21 +41,33 @@ const client = rihawk({
 });
 ```
 
-The factory works with or without `new`, and the class is also exported:
-
-```javascript
-const { Client } = require('rihawk');
-const client = new Client({ connectionString: '127.0.0.1:8087' });
-```
+The factory works with or without `new`, and the `Client` class is also
+exported.
 
 All streams emit:
 
 - `data` — one record per response
-- `error` — a failed request; the stream **continues** with the remaining requests
+- `error` — a failed request; the error carries its coordinate
+  (`error.bucket`, `error.key`, ...) and the stream **continues** with the
+  remaining requests
 - `end` — every requested combination has been processed
 
 With the default `autoJSON: true`, stored JSON values are parsed automatically
 on reads. Vector clocks are returned as base64 strings.
+
+### Stream tuning
+
+Every method takes an optional trailing `streamOptions` argument:
+
+```javascript
+const controller = new AbortController();
+
+client.get('nfl_team', manyKeys, { r: 2 }, {
+  concurrent: 8,            // requests issued in parallel per batch (default 1)
+  highWaterMark: 32,        // records buffered before backpressure (default 16)
+  signal: controller.signal // aborting destroys the stream
+});
+```
 
 ## API
 
@@ -59,7 +79,7 @@ Returns a new `Client`.
   `connectionString` (`'host:port:weight,host:port,...'`), `pool`, `retries`,
   `connectionTimeout`, `autoJSON`, `auth`, `tls`, ...
 
-### `client.get(bucket, key, [options])`
+### `client.get(bucket, key, [options], [streamOptions])`
 
 Returns values for every bucket/key combination.
 
@@ -72,17 +92,19 @@ Emits `{ bucket, key, vclock, content }`. Keys that are not found are skipped.
 ```javascript
 client.get('nfl_team', ['CHI', 'MIA', 'SD'])
   .on('data', (data) => console.log('#DATA', data))
-  .on('error', (error) => console.error('#ERROR', error))
+  .on('error', (error) => console.error('#ERROR', error.bucket, error.key, error))
   .on('end', () => console.log('#END'));
 ```
 
-### `client.put(bucket, key, value, [options])`
+### `client.put(bucket, key, value, [options], [streamOptions])`
 
-Stores values as JSON for every bucket/key/value combination.
+Stores values for every bucket/key/value combination. Values are stored as
+JSON unless `options.content_type` is set, in which case they are stored as
+given.
 
 - **value** — any JSON-serializable value, or an array of them.
 - **options** — Riak request options (`w`, `dw`, `vclock`, `indexes`,
-  `return_body` — defaults to `true` — ...).
+  `content_type`, `return_body` — defaults to `true` — ...).
 
 Emits `{ bucket, key, vclock, content }`.
 
@@ -90,9 +112,12 @@ Emits `{ bucket, key, vclock, content }`.
 client.put('nfl_team', 'CHI', { name: 'Chicago Bears' })
   .on('data', (data) => console.log('#DATA', data))
   .on('end', () => console.log('#END'));
+
+// Store raw (non-JSON) content:
+client.put('pages', 'home', '<h1>hi</h1>', { content_type: 'text/html' });
 ```
 
-### `client.getIndex(bucket, index, value, [options])`
+### `client.getIndex(bucket, index, value, [options], [streamOptions])`
 
 Returns keys matching a secondary index for every bucket/index/value combination.
 
@@ -104,13 +129,7 @@ Emits `{ bucket, index, value, keys, continuation }`. When `max_results` is
 set, pass the emitted `continuation` back via `options.continuation` to page
 through the rest.
 
-```javascript
-client.getIndex('nfl_team', 'division_bin', ['NFC-North', 'AFC-East'])
-  .on('data', (data) => console.log('#DATA', data.keys))
-  .on('end', () => console.log('#END'));
-```
-
-### `client.putCrdt(bucket, key, op, [options])`
+### `client.putCrdt(bucket, key, op, [options], [streamOptions])`
 
 Applies CRDT operation(s) for every bucket/key/op combination.
 
@@ -120,12 +139,12 @@ Applies CRDT operation(s) for every bucket/key/op combination.
 
 Emits `{ bucket, key, context, counter_value, set_value, map_value, value }`.
 
-### `client.getCrdt(bucket, key, [options])`
+### `client.getCrdt(bucket, key, [options], [streamOptions])`
 
 Returns CRDT(s) for every bucket/key combination.
 Emits `{ bucket, key, context, type, value }`.
 
-### `client.updateCounter(bucket, key, value, [options])`
+### `client.updateCounter(bucket, key, value, [options], [streamOptions])`
 
 Convenience wrapper around `putCrdt` that increments (or, with a negative
 `value`, decrements) the counter(s) at every bucket/key combination.
@@ -136,7 +155,7 @@ client.updateCounter('nfl_teams_count', 'alls', 1, { type: 'counter' })
   .on('end', () => console.log('#END'));
 ```
 
-### `client.getCounter(bucket, key, [options])`
+### `client.getCounter(bucket, key, [options], [streamOptions])`
 
 Alias of `client.getCrdt`.
 
@@ -150,17 +169,20 @@ The underlying [no-riak](https://github.com/oleksiyk/no-riak) client, for
 operations rihawk does not wrap (`del`, `listKeys`, `mapReduce`, search,
 bucket administration, and the `Riak.CRDT.*` wrappers).
 
-### Stream options
+### Stream factories
 
 Every stream factory under `client.streams` (`Get`, `Put`, `GetCrdt`,
-`PutCrdt`, `GetIndex`) can also be used directly and accepts:
+`PutCrdt`, `GetIndex`) can also be used directly — or imported from
+`rihawk/streams/*` — and accepts:
 
 - **client** — a no-riak client instance (required).
-- **concurrent** — how many requests to issue in parallel per read (default `1`).
 - **options** — per-request Riak options.
+- **concurrent**, **highWaterMark**, **signal** — stream tuning, as above.
 
 ```javascript
-const get = client.streams.Get({
+import Get from 'rihawk/streams/get';
+
+const stream = Get({
   client: client.client,
   bucket: 'nfl_team',
   key: ['CHI', 'MIA', 'SD'],
@@ -168,13 +190,19 @@ const get = client.streams.Get({
 });
 ```
 
-## Testing
+## Development
 
-The test suite uses the built-in [`node:test`](https://nodejs.org/api/test.html)
-runner with a mocked no-riak client — no Riak server required:
+The source is TypeScript (`src/`), compiled to `dist/`. The test suite uses
+the built-in [`node:test`](https://nodejs.org/api/test.html) runner with a
+mocked no-riak client — no Riak server required — and runs against the
+compiled output, importing the package by name to exercise the real exports.
 
 ```sh
-npm test        # or: make test
+npm test               # build + run tests (or: make test)
+npm run test:coverage  # with a coverage report
+npm run lint           # ESLint
+npm run typecheck      # tsc --noEmit over src and test
+npm run build          # compile src/ to dist/
 ```
 
 Common tasks are also available through `make` (run `make` to list them),
@@ -185,6 +213,8 @@ make riak-up    # start Riak KV in Docker
 make verify     # put/get round-trip against 127.0.0.1:8087
 make riak-down  # tear it down
 ```
+
+See [CHANGELOG.md](CHANGELOG.md) for release history.
 
 ## License
 
