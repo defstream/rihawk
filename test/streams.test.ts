@@ -1,14 +1,13 @@
-'use strict';
+import assert from 'node:assert/strict';
+import { describe, it } from 'node:test';
 
-const assert = require('node:assert/strict');
-const { describe, it } = require('node:test');
+import Get from 'rihawk/streams/get';
+import Put from 'rihawk/streams/put';
+import GetCrdt from 'rihawk/streams/getCrdt';
+import PutCrdt from 'rihawk/streams/putCrdt';
+import GetIndex from 'rihawk/streams/getIndex';
 
-const Get = require('../lib/streams/get');
-const Put = require('../lib/streams/put');
-const GetCrdt = require('../lib/streams/getCrdt');
-const PutCrdt = require('../lib/streams/putCrdt');
-const GetIndex = require('../lib/streams/getIndex');
-const { mockClient, collect } = require('./helpers');
+import { mockClient, collect } from './helpers';
 
 describe('Get', () => {
   it('emits one record per key', async () => {
@@ -95,6 +94,64 @@ describe('Get', () => {
     assert.deepEqual(data.map(({ key }) => key), ['one', 'two']);
   });
 
+  it('assigns the failing coordinate onto re-emitted errors', async () => {
+    const client = mockClient(() => new Error('boom'));
+
+    const { errors } = await collect(Get({ client, bucket: 'teams', key: 'CHI' }));
+
+    assert.equal(errors.length, 1);
+    assert.equal(errors[0].bucket, 'teams');
+    assert.equal(errors[0].key, 'CHI');
+  });
+
+  it('aborts via AbortSignal', async () => {
+    const controller = new AbortController();
+    const client = mockClient(() => ({ vclock: 'v', content: [] }));
+
+    const stream = Get({ client, bucket: 'b', key: 'k', signal: controller.signal });
+    controller.abort();
+
+    const { errors } = await collect(stream);
+
+    assert.equal(errors.length, 1);
+    assert.equal(errors[0].name, 'AbortError');
+    assert.ok(stream.destroyed);
+  });
+
+  it('stops fetching once destroyed', async () => {
+    const client = mockClient(() => ({ vclock: 'v', content: [] }));
+
+    const stream = Get({ client, bucket: 'b', key: ['1', '2', '3', '4', '5'] });
+    stream.once('data', () => stream.destroy());
+    await collect(stream);
+    await new Promise((resolve) => setTimeout(resolve, 20));
+
+    assert.ok(
+      client.calls.length < 5,
+      `expected fetching to stop early, saw ${client.calls.length} calls`
+    );
+  });
+
+  it('prefetches the next batch while the consumer drains (highWaterMark)', async () => {
+    const client = mockClient((method, request) => ({
+      vclock: 'v-' + request.key,
+      content: []
+    }));
+
+    const stream = Get({ client, bucket: 'b', key: ['1', '2', '3'], highWaterMark: 1 });
+    await new Promise((resolve) => stream.once('readable', resolve));
+    await new Promise((resolve) => setTimeout(resolve, 10));
+
+    assert.ok(
+      client.calls.length >= 2,
+      `expected read-ahead to issue the next request, saw ${client.calls.length} calls`
+    );
+
+    const { data } = await collect(stream);
+    assert.equal(client.calls.length, 3);
+    assert.ok(data.length > 0);
+  });
+
   it('emits an error when a required option is missing', async () => {
     const { data, errors } = await collect(Get({ client: mockClient(), bucket: 'b' }));
 
@@ -157,11 +214,32 @@ describe('Put', () => {
       ['k1="v1"', 'k1="v2"', 'k2="v1"', 'k2="v2"']
     );
   });
+
+  it('stores the raw value when content_type is set', async () => {
+    const client = mockClient(() => ({}));
+
+    await collect(
+      Put({
+        client,
+        bucket: 'b',
+        key: 'k',
+        value: 'plain text',
+        options: { content_type: 'text/plain' }
+      })
+    );
+
+    assert.equal(client.calls[0].request.content.value, 'plain text');
+    assert.equal(client.calls[0].request.content.content_type, 'text/plain');
+  });
 });
 
 describe('GetCrdt', () => {
   it('emits context, type, and value per key', async () => {
-    const client = mockClient(() => ({ context: 'ctx', type: 'counter', value: { counter_value: 41 } }));
+    const client = mockClient(() => ({
+      context: 'ctx',
+      type: 'counter',
+      value: { counter_value: 41 }
+    }));
 
     const { data, errors } = await collect(
       GetCrdt({ client, bucket: 'counts', key: 'alls', options: { type: 'counter' } })

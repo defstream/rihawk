@@ -1,18 +1,18 @@
-'use strict';
+import assert from 'node:assert/strict';
+import { describe, it } from 'node:test';
+import { Readable } from 'node:stream';
 
-const assert = require('node:assert/strict');
-const { describe, it } = require('node:test');
-const { Readable } = require('node:stream');
+import createClient from 'rihawk';
 
-const createClient = require('../lib/client');
+import { mockClient, collect, type MockClient, type Responder } from './helpers';
+
 const { Client } = createClient;
-const { mockClient, collect } = require('./helpers');
 
 /** Builds a Client whose underlying no-riak client is replaced with a mock. */
-function stubbedClient(respond) {
+function stubbedClient(respond?: Responder) {
   const client = createClient({});
   client.client = mockClient(respond);
-  return client;
+  return client as InstanceType<typeof Client> & { client: MockClient };
 }
 
 describe('Client', () => {
@@ -33,16 +33,12 @@ describe('Client', () => {
     );
     for (const [name, factory] of Object.entries(Client.prototype.streams)) {
       assert.equal(typeof factory, 'function');
-      assert.equal(typeof factory[name], 'function', `${name} class export`);
+      assert.equal(
+        typeof (factory as unknown as Record<string, unknown>)[name],
+        'function',
+        `${name} class export`
+      );
     }
-  });
-
-  it('end() closes the underlying client', async () => {
-    const client = stubbedClient();
-
-    await client.end();
-
-    assert.deepEqual(client.client.calls.map(({ method }) => method), ['end']);
   });
 
   it('get(bucket, key) streams values from the underlying client', async () => {
@@ -134,5 +130,24 @@ describe('Client', () => {
     );
 
     assert.deepEqual(data.map(({ value }) => value), [7, 7]);
+  });
+
+  it('passes streamOptions through to the stream', async () => {
+    const client = stubbedClient(() => ({ vclock: 'v', content: [] }));
+
+    const stream = client.get('b', ['1', '2', '3', '4'], {}, { concurrent: 2 });
+    assert.equal(stream.concurrent, 2);
+
+    const { data, errors } = await collect(stream);
+    assert.equal(errors.length, 0);
+    assert.equal(data.length, 4);
+  });
+
+  it('end() closes the underlying client', async () => {
+    const client = stubbedClient();
+
+    await client.end();
+
+    assert.deepEqual(client.client.calls.map(({ method }) => method), ['end']);
   });
 });
