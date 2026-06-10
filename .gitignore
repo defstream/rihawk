@@ -26,3 +26,8 @@ node_modules
 
 # Users Environment Variables
 .lock-wscript
+
+# IDEs and editors
+.idea/
+.vscode/
+.DS_Store

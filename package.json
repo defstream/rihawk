@@ -1,7 +1,8 @@
 {
   "name": "rihawk",
   "description": "A streaming riakpbc wrapper with advanced features",
-  "version": "0.0.11",
+  "version": "0.1.0",
+  "license": "MIT",
   "homepage": "https://github.com/defstream/rihawk",
   "bugs": "https://github.com/defstream/rihawk/issues",
   "author": {
@@ -11,27 +12,30 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/defstream/rihawk"
+    "url": "git+https://github.com/defstream/rihawk.git"
   },
-  "keywords": [],
+  "keywords": [
+    "riak",
+    "riakpbc",
+    "stream",
+    "streaming",
+    "crdt",
+    "database"
+  ],
   "engines": {
-    "node": ">=0.10.32"
+    "node": ">=22.0.0"
   },
   "main": "lib/client.js",
+  "files": [
+    "lib"
+  ],
   "dependencies": {
-    "neo-async": "0.5.3",
-    "riakpbc": "2.1.0",
-    "doxx": "1.2.5"    
-  },
-  "devDependencies": {
-    "chai": "^1.10.0",
-    "mocha": "^2.1.0"
+    "riakpbc": "^2.1.0"
   },
   "scripts": {
-    "test": "mocha test",
-    "prepublish": "doxx -s lib -t docs"
+    "test": "node --test"
   },
   "publishConfig": {
-    "registry": "http://registry.npmjs.org"
-  }  
+    "registry": "https://registry.npmjs.org"
+  }
 }
