@@ -38,7 +38,7 @@ class Client {
    *                (connectionString, pool, retries, auth, tls, ...).
    */
   constructor(options?: ClientOptions) {
-    this.client = new NoRiakClient(options) as RiakBackend;
+    this.client = new NoRiakClient(options);
   }
 
   /** Closes the underlying connection pool. */
@@ -155,6 +155,7 @@ Client.prototype.streams = {
   PutCrdt: createPutCrdt
 };
 
+// eslint-disable-next-line @typescript-eslint/unbound-method -- intentional prototype alias; `this` binds at call time
 Client.prototype.getCounter = Client.prototype.getCrdt;
 
 type CreateClient = {
