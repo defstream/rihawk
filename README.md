@@ -217,6 +217,9 @@ make bench      # records/sec sweep across concurrency levels
 make riak-down  # tear it down
 ```
 
+Run `make hooks` once to enable a pre-commit hook that lints and
+type-checks before every commit (`git commit --no-verify` bypasses it).
+
 Releases are published from CI with npm provenance when a `v*` tag is
 pushed. Security reports: see [SECURITY.md](SECURITY.md).
 

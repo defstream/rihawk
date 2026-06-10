@@ -5,6 +5,19 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 (0.x minor versions may contain breaking changes).
 
+## [Unreleased]
+
+### Added
+- Stylistic type-checked linting (`tseslint.configs.stylisticTypeChecked`).
+- OpenSSF Scorecard workflow publishing supply-chain posture results.
+- Opt-in pre-commit hook running lint + typecheck (`make hooks`).
+
+### Fixed
+- A counter legitimately at 0 emitted `value: undefined` from `putCrdt`
+  streams due to `||`-chaining; now uses nullish coalescing.
+- `concurrent: 0` no longer ends streams prematurely; the effective
+  minimum is 1.
+
 ## [0.3.0] - 2026-06-10
 
 ### Added
