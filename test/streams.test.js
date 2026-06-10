@@ -12,9 +12,10 @@ const { mockClient, collect } = require('./helpers');
 
 describe('Get', () => {
   it('emits one record per key', async () => {
-    const client = mockClient((method, request) => [
-      { vclock: 'v-' + request.key, content: [{ value: request.key }] }
-    ]);
+    const client = mockClient((method, request) => ({
+      vclock: 'v-' + request.key,
+      content: [{ value: request.key }]
+    }));
 
     const { data, errors } = await collect(
       Get({ client, bucket: 'nfl_team', key: ['SD', 'MIA', 'CHI'] })
@@ -32,7 +33,7 @@ describe('Get', () => {
   });
 
   it('walks every bucket and key combination, keys fastest', async () => {
-    const client = mockClient(() => [{ vclock: 'v', content: [] }]);
+    const client = mockClient(() => ({ vclock: 'v', content: [] }));
 
     const { data } = await collect(
       Get({ client, bucket: ['a', 'b'], key: ['x', 'y'] })
@@ -45,7 +46,7 @@ describe('Get', () => {
   });
 
   it('passes request options through to the client', async () => {
-    const client = mockClient(() => []);
+    const client = mockClient(() => null);
 
     await collect(
       Get({
@@ -69,7 +70,7 @@ describe('Get', () => {
 
   it('skips not-found keys and still ends cleanly', async () => {
     const client = mockClient((method, request) =>
-      request.key === 'missing' ? [] : [{ vclock: 'v', content: [] }]
+      request.key === 'missing' ? null : { vclock: 'v', content: [] }
     );
 
     const { data, errors } = await collect(
@@ -82,7 +83,7 @@ describe('Get', () => {
 
   it('re-emits client errors without ending the stream', async () => {
     const client = mockClient((method, request) =>
-      request.key === 'bad' ? new Error('boom') : [{ vclock: 'v', content: [] }]
+      request.key === 'bad' ? new Error('boom') : { vclock: 'v', content: [] }
     );
 
     const { data, errors } = await collect(
@@ -103,9 +104,10 @@ describe('Get', () => {
   });
 
   it('does not lose records when fetching concurrently', async () => {
-    const client = mockClient((method, request) => [
-      { vclock: 'v-' + request.key, content: [] }
-    ]);
+    const client = mockClient((method, request) => ({
+      vclock: 'v-' + request.key,
+      content: []
+    }));
 
     const { data } = await collect(
       Get({ client, bucket: 'b', key: ['1', '2', '3', '4', '5'], concurrent: 3 })
@@ -117,7 +119,7 @@ describe('Get', () => {
 
 describe('Put', () => {
   it('stores values as JSON and emits the response', async () => {
-    const client = mockClient(() => [{ vclock: 'v', content: [] }]);
+    const client = mockClient(() => ({ vclock: 'v', content: [] }));
 
     const { data, errors } = await collect(
       Put({ client, bucket: 'b', key: 'k', value: { name: 'Albert Einstein' } })
@@ -133,7 +135,7 @@ describe('Put', () => {
   });
 
   it('requests the body back by default but honors return_body: false', async () => {
-    const client = mockClient(() => [{}]);
+    const client = mockClient(() => ({}));
 
     await collect(Put({ client, bucket: 'b', key: 'k', value: 1 }));
     await collect(Put({ client, bucket: 'b', key: 'k', value: 1, options: { return_body: false } }));
@@ -143,7 +145,7 @@ describe('Put', () => {
   });
 
   it('walks every bucket, key, and value combination', async () => {
-    const client = mockClient(() => [{}]);
+    const client = mockClient(() => ({}));
 
     const { data } = await collect(
       Put({ client, bucket: 'b', key: ['k1', 'k2'], value: ['v1', 'v2'] })
@@ -159,7 +161,7 @@ describe('Put', () => {
 
 describe('GetCrdt', () => {
   it('emits context, type, and value per key', async () => {
-    const client = mockClient(() => [{ context: 'ctx', type: 'counter', value: 41 }]);
+    const client = mockClient(() => ({ context: 'ctx', type: 'counter', value: { counter_value: 41 } }));
 
     const { data, errors } = await collect(
       GetCrdt({ client, bucket: 'counts', key: 'alls', options: { type: 'counter' } })
@@ -167,16 +169,24 @@ describe('GetCrdt', () => {
 
     assert.equal(errors.length, 0);
     assert.deepEqual(data, [
-      { bucket: 'counts', key: 'alls', context: 'ctx', type: 'counter', value: 41 }
+      { bucket: 'counts', key: 'alls', context: 'ctx', type: 'counter', value: { counter_value: 41 } }
     ]);
-    assert.equal(client.calls[0].method, 'getCrdt');
+    assert.equal(client.calls[0].method, 'dtFetch');
     assert.equal(client.calls[0].request.type, 'counter');
+  });
+
+  it('defaults the bucket type to "default"', async () => {
+    const client = mockClient(() => ({}));
+
+    await collect(GetCrdt({ client, bucket: 'b', key: 'k' }));
+
+    assert.equal(client.calls[0].request.type, 'default');
   });
 });
 
 describe('PutCrdt', () => {
   it('applies an op and emits the CRDT result', async () => {
-    const client = mockClient(() => [{ context: 'ctx', counter_value: 42 }]);
+    const client = mockClient(() => ({ context: 'ctx', counter_value: 42 }));
 
     const { data, errors } = await collect(
       PutCrdt({
@@ -194,14 +204,14 @@ describe('PutCrdt', () => {
     assert.equal(data[0].value, 42);
 
     const { method, request } = client.calls[0];
-    assert.equal(method, 'putCrdt');
+    assert.equal(method, 'dtUpdate');
     assert.deepEqual(request.op, { counter_op: { increment: 1 } });
     assert.equal(request.type, 'counter');
     assert.equal(request.return_body, true);
   });
 
   it('defaults the bucket type to "default"', async () => {
-    const client = mockClient(() => [{}]);
+    const client = mockClient(() => ({}));
 
     await collect(PutCrdt({ client, bucket: 'b', key: 'k', op: {} }));
 
@@ -211,7 +221,7 @@ describe('PutCrdt', () => {
 
 describe('GetIndex', () => {
   it('queries the index and emits matching keys', async () => {
-    const client = mockClient(() => [{ keys: ['A', 'B'] }]);
+    const client = mockClient(() => ({ results: ['A', 'B'], continuation: 'next' }));
 
     const { data, errors } = await collect(
       GetIndex({ client, bucket: 'relationship', index: 'team_bin', value: 'CHI' })
@@ -219,20 +229,25 @@ describe('GetIndex', () => {
 
     assert.equal(errors.length, 0);
     assert.deepEqual(data, [
-      { bucket: 'relationship', index: 'team_bin', value: 'CHI', keys: ['A', 'B'] }
+      {
+        bucket: 'relationship',
+        index: 'team_bin',
+        value: 'CHI',
+        keys: ['A', 'B'],
+        continuation: 'next'
+      }
     ]);
 
     const { method, request } = client.calls[0];
-    assert.equal(method, 'getIndex');
+    assert.equal(method, 'index');
     assert.equal(request.index, 'team_bin');
     assert.equal(request.key, 'CHI');
     assert.equal(request.qtype, 0);
     assert.equal(request.return_terms, true);
-    assert.equal(request.stream, true);
   });
 
   it('walks every bucket, index, and value combination', async () => {
-    const client = mockClient(() => [{ keys: [] }]);
+    const client = mockClient(() => ({ results: [] }));
 
     const { data } = await collect(
       GetIndex({ client, bucket: 'b', index: ['i1', 'i2'], value: ['v1', 'v2'] })

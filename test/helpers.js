@@ -1,38 +1,31 @@
 'use strict';
 
-const { Readable } = require('node:stream');
-
 /**
- * Builds a fake riakpbc client. Every method records its calls and returns a
- * readable stream of whatever `respond(method, request)` returns. Returning
- * an Error instance makes the response stream emit it as an 'error' event.
- * @param  {Function} [respond] maps (method, request) to an array of
- *                              responses, an Error, or undefined for an
- *                              empty (not-found) response.
+ * Builds a fake no-riak client. Every method records its calls and resolves
+ * to whatever `respond(method, request)` returns. Returning an Error
+ * instance makes the call reject with it; returning null/undefined emulates
+ * a not-found response.
+ * @param  {Function} [respond] maps (method, request) to a response object,
+ *                              an Error, or null/undefined.
  * @return {Object} the fake client with a `calls` array attached.
  */
-function mockClient(respond = () => []) {
+function mockClient(respond = () => null) {
   const calls = [];
   const handler = (method) => (request) => {
     calls.push({ method, request });
-    const responses = respond(method, request);
-    if (responses instanceof Error) {
-      return new Readable({
-        objectMode: true,
-        read() {
-          this.destroy(responses);
-        }
-      });
+    const response = respond(method, request);
+    if (response instanceof Error) {
+      return Promise.reject(response);
     }
-    return Readable.from(responses ?? [], { objectMode: true });
+    return Promise.resolve(response);
   };
   return {
     calls,
     get: handler('get'),
     put: handler('put'),
-    getCrdt: handler('getCrdt'),
-    putCrdt: handler('putCrdt'),
-    getIndex: handler('getIndex')
+    index: handler('index'),
+    dtFetch: handler('dtFetch'),
+    dtUpdate: handler('dtUpdate')
   };
 }
 

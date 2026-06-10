@@ -1,7 +1,7 @@
 {
   "name": "rihawk",
-  "description": "A streaming riakpbc wrapper with advanced features",
-  "version": "0.1.0",
+  "description": "A streaming Riak client with advanced features, built on no-riak",
+  "version": "0.2.0",
   "license": "MIT",
   "homepage": "https://github.com/defstream/rihawk",
   "bugs": "https://github.com/defstream/rihawk/issues",
@@ -16,7 +16,7 @@
   },
   "keywords": [
     "riak",
-    "riakpbc",
+    "no-riak",
     "stream",
     "streaming",
     "crdt",
@@ -30,7 +30,7 @@
     "lib"
   ],
   "dependencies": {
-    "riakpbc": "^2.1.0"
+    "no-riak": "^1.6.11"
   },
   "scripts": {
     "test": "node --test"

@@ -8,7 +8,7 @@ const createClient = require('../lib/client');
 const { Client } = createClient;
 const { mockClient, collect } = require('./helpers');
 
-/** Builds a Client whose underlying riakpbc client is replaced with a mock. */
+/** Builds a Client whose underlying no-riak client is replaced with a mock. */
 function stubbedClient(respond) {
   const client = createClient({});
   client.client = mockClient(respond);
@@ -34,7 +34,7 @@ describe('Client', () => {
   });
 
   it('get(bucket, key) streams values from the underlying client', async () => {
-    const client = stubbedClient(() => [{ vclock: 'v', content: [{ value: '{}' }] }]);
+    const client = stubbedClient(() => ({ vclock: 'v', content: [{ value: '{}' }] }));
 
     const stream = client.get('nfl_team', 'MIA');
     assert.ok(stream instanceof Readable);
@@ -47,7 +47,7 @@ describe('Client', () => {
   });
 
   it('get([bucket], [key]) walks every combination', async () => {
-    const client = stubbedClient(() => [{ vclock: 'v', content: [] }]);
+    const client = stubbedClient(() => ({ vclock: 'v', content: [] }));
 
     const { data } = await collect(
       client.get(['nfl_team', 'mlb_team'], ['CHI', 'MIA'])
@@ -60,7 +60,7 @@ describe('Client', () => {
   });
 
   it('put(bucket, key, value) writes JSON through the underlying client', async () => {
-    const client = stubbedClient(() => [{ vclock: 'v', content: [] }]);
+    const client = stubbedClient(() => ({ vclock: 'v', content: [] }));
 
     const { data, errors } = await collect(
       client.put('test_data', 'A', { name: 'Albert Einstein' })
@@ -75,7 +75,7 @@ describe('Client', () => {
   });
 
   it('getIndex(bucket, index, [value]) queries each value', async () => {
-    const client = stubbedClient(() => [{ keys: ['k'] }]);
+    const client = stubbedClient(() => ({ results: ['k'] }));
 
     const { data } = await collect(
       client.getIndex('nfl_team', 'team_bin', ['SD', 'MIA'])
@@ -85,7 +85,7 @@ describe('Client', () => {
   });
 
   it('putCrdt(bucket, [key], op) applies the op to each key', async () => {
-    const client = stubbedClient(() => [{ counter_value: 1 }]);
+    const client = stubbedClient(() => ({ counter_value: 1 }));
 
     const { data, errors } = await collect(
       client.putCrdt(
@@ -101,7 +101,7 @@ describe('Client', () => {
   });
 
   it('updateCounter(bucket, key, value) builds the counter op', async () => {
-    const client = stubbedClient(() => [{ counter_value: -1 }]);
+    const client = stubbedClient(() => ({ counter_value: -1 }));
 
     const { data } = await collect(
       client.updateCounter('nfl_teams_count', 'alls', -1, { type: 'counter' })
@@ -115,7 +115,7 @@ describe('Client', () => {
   });
 
   it('getCounter(bucket, [key]) streams each counter', async () => {
-    const client = stubbedClient(() => [{ type: 'counter', value: 7 }]);
+    const client = stubbedClient(() => ({ type: 'counter', value: 7 }));
 
     const { data } = await collect(
       client.getCounter('nfl_teams_count', ['alls', 'everyones'], { type: 'counter' })
