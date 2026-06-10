@@ -27,6 +27,12 @@ class Client {
   /** The underlying no-riak client, for operations rihawk does not wrap. */
   client: RiakBackend;
 
+  /** All Riak API / stream factories. Shared via the prototype. */
+  declare streams: StreamFactories;
+
+  /** Returns counter(s) from bucket(s) for the given key(s). Alias of getCrdt. */
+  declare getCounter: Client['getCrdt'];
+
   /**
    * @param options no-riak client options
    *                (connectionString, pool, retries, auth, tls, ...).
@@ -139,13 +145,6 @@ class Client {
   ) {
     return this.putCrdt(bucket, key, { counter_op: { increment: value } }, options, streamOptions);
   }
-}
-
-interface Client {
-  /** All Riak API / stream factories. */
-  streams: StreamFactories;
-  /** Returns counter(s) from bucket(s) for the given key(s). Alias of getCrdt. */
-  getCounter: Client['getCrdt'];
 }
 
 Client.prototype.streams = {
