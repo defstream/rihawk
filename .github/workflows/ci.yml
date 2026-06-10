@@ -22,6 +22,9 @@ jobs:
           node-version: 22.x
           cache: npm
       - run: npm ci
+      # Type-aware linting resolves the package's own dist/ types
+      # (tests import 'rihawk' by name), so build first.
+      - run: npm run build
       - run: npm run lint
 
   typecheck:
