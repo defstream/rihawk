@@ -31,6 +31,18 @@ describe('Client', () => {
       Object.keys(Client.prototype.streams).sort(),
       ['Get', 'GetCrdt', 'GetIndex', 'Put', 'PutCrdt']
     );
+    for (const [name, factory] of Object.entries(Client.prototype.streams)) {
+      assert.equal(typeof factory, 'function');
+      assert.equal(typeof factory[name], 'function', `${name} class export`);
+    }
+  });
+
+  it('end() closes the underlying client', async () => {
+    const client = stubbedClient();
+
+    await client.end();
+
+    assert.deepEqual(client.client.calls.map(({ method }) => method), ['end']);
   });
 
   it('get(bucket, key) streams values from the underlying client', async () => {

@@ -25,7 +25,8 @@ function mockClient(respond = () => null) {
     put: handler('put'),
     index: handler('index'),
     dtFetch: handler('dtFetch'),
-    dtUpdate: handler('dtUpdate')
+    dtUpdate: handler('dtUpdate'),
+    end: handler('end')
   };
 }
 
