@@ -2,6 +2,7 @@
   "name": "rihawk",
   "description": "A streaming Riak client with advanced features, built on no-riak",
   "version": "0.3.0",
+  "type": "commonjs",
   "license": "MIT",
   "homepage": "https://github.com/defstream/rihawk",
   "bugs": "https://github.com/defstream/rihawk/issues",
@@ -30,9 +31,14 @@
   "types": "dist/client.d.ts",
   "exports": {
     ".": {
-      "types": "./dist/client.d.ts",
-      "import": "./dist/client.mjs",
-      "require": "./dist/client.js"
+      "import": {
+        "types": "./dist/client.d.mts",
+        "default": "./dist/client.mjs"
+      },
+      "require": {
+        "types": "./dist/client.d.ts",
+        "default": "./dist/client.js"
+      }
     },
     "./streams/*": "./dist/streams/*.js",
     "./package.json": "./package.json"
@@ -44,20 +50,23 @@
     "no-riak": "^1.6.11"
   },
   "devDependencies": {
+    "@arethetypeswrong/cli": "^0.18.3",
     "@eslint/js": "^9.0.0",
     "@types/node": "^22.0.0",
     "eslint": "^9.0.0",
+    "publint": "^0.3.21",
     "typescript": "^5.5.0",
     "typescript-eslint": "^8.0.0"
   },
   "scripts": {
-    "build": "rm -rf dist && tsc -p tsconfig.build.json && cp src/client.mjs dist/client.mjs",
+    "build": "rm -rf dist && tsc -p tsconfig.build.json && cp src/client.mjs src/client.d.mts dist/",
     "build:test": "rm -rf build && tsc -p tsconfig.test.json",
     "pretest": "npm run build && npm run build:test",
     "test": "node --test 'build/**/*.test.js' test/esm.test.mjs",
     "test:coverage": "npm run pretest && node --test --experimental-test-coverage 'build/**/*.test.js' test/esm.test.mjs",
     "lint": "eslint .",
     "typecheck": "tsc -p tsconfig.json",
+    "check:package": "publint && attw --pack .",
     "prepack": "npm run build"
   },
   "publishConfig": {
