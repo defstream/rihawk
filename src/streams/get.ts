@@ -37,10 +37,10 @@ class Get extends RiakStream {
   }
 }
 
-type GetFactory = {
+interface GetFactory {
   (options: Partial<RiakStreamOptions>): Get;
   Get: typeof Get;
-};
+}
 
 /** Creates a Get stream. */
 const factory = ((options: Partial<RiakStreamOptions>) => new Get(options)) as GetFactory;

@@ -7,9 +7,7 @@
  */
 
 /** Per-request Riak options (`r`, `w`, `timeout`, `type`, ...). */
-export interface RequestOptions {
-  [option: string]: unknown;
-}
+export type RequestOptions = Record<string, unknown>;
 
 /** Stream tuning accepted by every stream and client method. */
 export interface StreamTuning {

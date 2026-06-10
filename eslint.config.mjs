@@ -9,6 +9,7 @@ export default defineConfig(
   },
   js.configs.recommended,
   tseslint.configs.recommendedTypeChecked,
+  tseslint.configs.stylisticTypeChecked,
   {
     languageOptions: {
       parserOptions: {

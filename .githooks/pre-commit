@@ -1,0 +1,12 @@
+#!/bin/sh
+# Pre-commit gate: lint + typecheck. Enable with `make hooks` (sets
+# core.hooksPath). Bypass for emergencies with `git commit --no-verify`.
+# Note: typecheck resolves the package's own dist/ types, so run a build
+# at least once (`make build`) before the first commit.
+set -e
+
+echo "pre-commit: eslint"
+npm run --silent lint
+
+echo "pre-commit: tsc"
+npm run --silent typecheck

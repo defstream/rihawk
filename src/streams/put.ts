@@ -29,7 +29,7 @@ class Put extends RiakStream {
       type: options.type,
       content: {
         value: options.content_type ? value : JSON.stringify(value),
-        content_type: options.content_type || 'application/json',
+        content_type: options.content_type ?? 'application/json',
         indexes: options.indexes
       }
     });
@@ -39,17 +39,17 @@ class Put extends RiakStream {
     const response = data as Record<string, unknown>;
     return {
       bucket,
-      key: response.key || key,
+      key: response.key ?? key,
       vclock: response.vclock,
       content: response.content
     };
   }
 }
 
-type PutFactory = {
+interface PutFactory {
   (options: Partial<RiakStreamOptions>): Put;
   Put: typeof Put;
-};
+}
 
 /** Creates a Put stream. */
 const factory = ((options: Partial<RiakStreamOptions>) => new Put(options)) as PutFactory;

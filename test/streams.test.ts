@@ -295,6 +295,16 @@ describe('PutCrdt', () => {
 
     assert.equal(client.calls[0].request.type, 'default');
   });
+
+  it('emits value 0 for a counter at zero', async () => {
+    const client = mockClient(() => ({ counter_value: 0 }));
+
+    const { data } = await collect(
+      PutCrdt({ client, bucket: 'b', key: 'k', op: { counter_op: { increment: 0 } } })
+    );
+
+    assert.equal(data[0].value, 0);
+  });
 });
 
 describe('GetIndex', () => {

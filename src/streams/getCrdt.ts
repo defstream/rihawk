@@ -19,7 +19,7 @@ class GetCrdt extends RiakStream {
       timeout: options.timeout,
       sloppy_quorum: options.sloppy_quorum,
       n_val: options.n_val,
-      type: options.type || 'default',
+      type: options.type ?? 'default',
       include_context: options.include_context
     });
   }
@@ -36,10 +36,10 @@ class GetCrdt extends RiakStream {
   }
 }
 
-type GetCrdtFactory = {
+interface GetCrdtFactory {
   (options: Partial<RiakStreamOptions>): GetCrdt;
   GetCrdt: typeof GetCrdt;
-};
+}
 
 /** Creates a GetCrdt stream. */
 const factory = ((options: Partial<RiakStreamOptions>) => new GetCrdt(options)) as GetCrdtFactory;

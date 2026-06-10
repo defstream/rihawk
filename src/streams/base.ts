@@ -72,9 +72,10 @@ export abstract class RiakStream extends Readable {
       return;
     }
 
-    this.client = options.client as RiakBackend;
-    this.options = options.options || {};
-    this.concurrent = options.concurrent || 1;
+    this.client = options.client!;
+    this.options = options.options ?? {};
+    // concurrent: 0 would produce empty batches and end the stream early.
+    this.concurrent = Math.max(1, options.concurrent ?? 1);
 
     const self = this as unknown as Record<string, unknown[]>;
     for (const name of dimensions) {

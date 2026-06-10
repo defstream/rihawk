@@ -37,10 +37,10 @@ class GetIndex extends RiakStream {
   }
 }
 
-type GetIndexFactory = {
+interface GetIndexFactory {
   (options: Partial<RiakStreamOptions>): GetIndex;
   GetIndex: typeof GetIndex;
-};
+}
 
 /** Creates a GetIndex stream. */
 const factory = ((options: Partial<RiakStreamOptions>) => new GetIndex(options)) as GetIndexFactory;

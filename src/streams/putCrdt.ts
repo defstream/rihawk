@@ -22,7 +22,7 @@ class PutCrdt extends RiakStream {
       timeout: options.timeout,
       sloppy_quorum: options.sloppy_quorum,
       n_val: options.n_val,
-      type: options.type || 'default'
+      type: options.type ?? 'default'
     });
   }
 
@@ -30,20 +30,20 @@ class PutCrdt extends RiakStream {
     const response = data as Record<string, unknown>;
     return {
       bucket,
-      key: response.key || key,
+      key: response.key ?? key,
       context: response.context,
       counter_value: response.counter_value,
       set_value: response.set_value,
       map_value: response.map_value,
-      value: response.counter_value || response.map_value || response.set_value
+      value: response.counter_value ?? response.map_value ?? response.set_value
     };
   }
 }
 
-type PutCrdtFactory = {
+interface PutCrdtFactory {
   (options: Partial<RiakStreamOptions>): PutCrdt;
   PutCrdt: typeof PutCrdt;
-};
+}
 
 /** Creates a PutCrdt stream. */
 const factory = ((options: Partial<RiakStreamOptions>) => new PutCrdt(options)) as PutCrdtFactory;

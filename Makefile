@@ -1,12 +1,17 @@
 .DEFAULT_GOAL := help
 
-.PHONY: help install ci build test coverage watch lint typecheck check-package audit clean riak-up riak-down verify bench
+.PHONY: help install hooks ci build test coverage watch lint typecheck check-package audit clean riak-up riak-down verify bench
 
 help: ## Show this help
 	@awk 'BEGIN {FS = ":.*##"} /^[a-zA-Z_-]+:.*##/ {printf "  \033[36m%-12s\033[0m %s\n", $$1, $$2}' $(MAKEFILE_LIST)
 
 install: ## Install dependencies
 	npm install
+
+hooks: ## Enable the pre-commit hook (lint + typecheck)
+	git config core.hooksPath .githooks
+	chmod +x .githooks/pre-commit
+	@echo "pre-commit hook enabled"
 
 ci: ## Clean install from the lockfile (what CI runs)
 	npm ci

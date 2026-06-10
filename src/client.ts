@@ -158,12 +158,12 @@ Client.prototype.streams = {
 // eslint-disable-next-line @typescript-eslint/unbound-method -- intentional prototype alias; `this` binds at call time
 Client.prototype.getCounter = Client.prototype.getCrdt;
 
-type CreateClient = {
+interface CreateClient {
   /** Creates a new Client. Works with or without `new`. */
   (options?: ClientOptions): Client;
   new (options?: ClientOptions): Client;
   Client: typeof Client;
-};
+}
 
 const createClient = function createClient(options?: ClientOptions): Client {
   return new Client(options);
