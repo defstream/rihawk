@@ -9,6 +9,17 @@ import type { ClientOptions, RequestOptions, RiakBackend, StreamTuning } from '.
 
 type Streamable = string | readonly string[];
 
+/**
+ * Named instance types for each stream, so declaration emit references
+ * these aliases instead of synthesizing anonymous class types (which
+ * TypeScript rejects for classes with private fields, TS4094).
+ */
+type GetStream = InstanceType<typeof createGet.Get>;
+type GetCrdtStream = InstanceType<typeof createGetCrdt.GetCrdt>;
+type GetIndexStream = InstanceType<typeof createGetIndex.GetIndex>;
+type PutStream = InstanceType<typeof createPut.Put>;
+type PutCrdtStream = InstanceType<typeof createPutCrdt.PutCrdt>;
+
 /** The stream factories backing each client method. */
 interface StreamFactories {
   Get: typeof createGet;
@@ -54,7 +65,7 @@ class Client {
    * @param options Riak request options.
    * @param streamOptions stream tuning: `concurrent`, `highWaterMark`, `signal`.
    */
-  get(bucket: Streamable, key: Streamable, options?: RequestOptions, streamOptions?: StreamTuning) {
+  get(bucket: Streamable, key: Streamable, options?: RequestOptions, streamOptions?: StreamTuning): GetStream {
     return this.streams.Get({ client: this.client, bucket, key, options, ...streamOptions });
   }
 
@@ -73,7 +84,7 @@ class Client {
     value: Streamable,
     options?: RequestOptions,
     streamOptions?: StreamTuning
-  ) {
+  ): GetIndexStream {
     return this.streams.GetIndex({ client: this.client, bucket, index, value, options, ...streamOptions });
   }
 
@@ -93,7 +104,7 @@ class Client {
     value: unknown,
     options?: RequestOptions,
     streamOptions?: StreamTuning
-  ) {
+  ): PutStream {
     return this.streams.Put({ client: this.client, bucket, key, value, options, ...streamOptions });
   }
 
@@ -112,7 +123,7 @@ class Client {
     op: unknown,
     options?: RequestOptions,
     streamOptions?: StreamTuning
-  ) {
+  ): PutCrdtStream {
     return this.streams.PutCrdt({ client: this.client, bucket, key, op, options, ...streamOptions });
   }
 
@@ -124,7 +135,7 @@ class Client {
    * @param options Riak request options (`type` is the bucket type, default `'default'`).
    * @param streamOptions stream tuning: `concurrent`, `highWaterMark`, `signal`.
    */
-  getCrdt(bucket: Streamable, key: Streamable, options?: RequestOptions, streamOptions?: StreamTuning) {
+  getCrdt(bucket: Streamable, key: Streamable, options?: RequestOptions, streamOptions?: StreamTuning): GetCrdtStream {
     return this.streams.GetCrdt({ client: this.client, bucket, key, options, ...streamOptions });
   }
 
@@ -142,7 +153,7 @@ class Client {
     value: number,
     options?: RequestOptions,
     streamOptions?: StreamTuning
-  ) {
+  ): PutCrdtStream {
     return this.putCrdt(bucket, key, { counter_op: { increment: value } }, options, streamOptions);
   }
 }
