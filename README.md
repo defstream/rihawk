@@ -174,7 +174,16 @@ The test suite uses the built-in [`node:test`](https://nodejs.org/api/test.html)
 runner with a mocked no-riak client — no Riak server required:
 
 ```sh
-npm test
+npm test        # or: make test
+```
+
+Common tasks are also available through `make` (run `make` to list them),
+including a live round-trip check against a local Riak node:
+
+```sh
+make riak-up    # start Riak KV in Docker
+make verify     # put/get round-trip against 127.0.0.1:8087
+make riak-down  # tear it down
 ```
 
 ## License
