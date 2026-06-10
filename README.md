@@ -200,19 +200,25 @@ compiled output, importing the package by name to exercise the real exports.
 ```sh
 npm test               # build + run tests (or: make test)
 npm run test:coverage  # with a coverage report
-npm run lint           # ESLint
+npm run lint           # ESLint (type-aware)
 npm run typecheck      # tsc --noEmit over src and test
+npm run check:package  # validate exports map and shipped types (publint + attw)
 npm run build          # compile src/ to dist/
 ```
 
 Common tasks are also available through `make` (run `make` to list them),
-including a live round-trip check against a local Riak node:
+including a live round-trip check and a throughput benchmark against a
+local Riak node:
 
 ```sh
 make riak-up    # start Riak KV in Docker
 make verify     # put/get round-trip against 127.0.0.1:8087
+make bench      # records/sec sweep across concurrency levels
 make riak-down  # tear it down
 ```
+
+Releases are published from CI with npm provenance when a `v*` tag is
+pushed. Security reports: see [SECURITY.md](SECURITY.md).
 
 See [CHANGELOG.md](CHANGELOG.md) for release history.
 

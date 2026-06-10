@@ -35,6 +35,7 @@ jobs:
       - run: npm ci
       - run: npm run build
       - run: npm run typecheck
+      - run: npm run check:package
 
   test:
     runs-on: ubuntu-latest
@@ -60,3 +61,23 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm audit --omit=dev
+
+  # Best-effort round-trip against a real Riak node. The basho/riak-kv image
+  # is ancient and community-maintained, so this job must not block merges.
+  integration:
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    services:
+      riak:
+        image: basho/riak-kv:latest
+        ports:
+          - 8087:8087
+    steps:
+      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+      - uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6.4.0
+        with:
+          node-version: 22.x
+          cache: npm
+      - run: npm ci
+      - run: npm run build
+      - run: node scripts/verify.mjs

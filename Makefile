@@ -1,6 +1,6 @@
 .DEFAULT_GOAL := help
 
-.PHONY: help install ci build test coverage watch lint typecheck audit clean riak-up riak-down verify
+.PHONY: help install ci build test coverage watch lint typecheck check-package audit clean riak-up riak-down verify bench
 
 help: ## Show this help
 	@awk 'BEGIN {FS = ":.*##"} /^[a-zA-Z_-]+:.*##/ {printf "  \033[36m%-12s\033[0m %s\n", $$1, $$2}' $(MAKEFILE_LIST)
@@ -29,6 +29,9 @@ lint: ## Run ESLint
 typecheck: ## Type-check src/ and test/ without emitting
 	npm run typecheck
 
+check-package: ## Validate exports map and shipped types (publint + attw)
+	npm run check:package
+
 audit: ## Check dependencies for known vulnerabilities
 	npm audit
 
@@ -44,16 +47,8 @@ riak-up: ## Start a local Riak KV node in Docker (pb port 8087)
 riak-down: ## Stop and remove the local Riak container
 	docker rm -f rihawk-riak
 
-verify: build ## Round-trip put/get against a local Riak node
-	node -e "\
-	const rihawk = require('./dist/client'); \
-	const c = rihawk({ connectionString: '127.0.0.1:8087' }); \
-	c.put('rihawk_verify', 'k1', { ok: true }) \
-	  .on('error', (e) => { console.error('PUT FAILED:', e.message); process.exit(1); }) \
-	  .on('data', (d) => console.log('put:', d.bucket, d.key)) \
-	  .on('end', () => { \
-	    c.get('rihawk_verify', 'k1') \
-	      .on('error', (e) => { console.error('GET FAILED:', e.message); process.exit(1); }) \
-	      .on('data', (d) => console.log('get:', JSON.stringify(d.content[0].value))) \
-	      .on('end', () => c.end().then(() => console.log('verify: OK'))); \
-	  });"
+verify: build ## Round-trip put/get against a local Riak node (retries until up)
+	node scripts/verify.mjs
+
+bench: build ## Throughput benchmark sweeping concurrency against a local Riak node
+	node bench/bench.mjs

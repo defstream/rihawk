@@ -21,10 +21,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   `error.key`, ...).
 - `put` honors `options.content_type`, storing the raw value instead of
   JSON when set.
-- ESLint (typescript-eslint), `npm run typecheck`, and
+- ESLint (typescript-eslint, type-aware), `npm run typecheck`, and
   `npm run test:coverage`.
 - CI hardening: SHA-pinned actions, least-privilege permissions,
-  lint/typecheck/audit/coverage jobs, and Dependabot.
+  lint/typecheck/audit/coverage jobs, Dependabot, CodeQL, and a
+  best-effort integration job against a real Riak service container.
+- Packaging validation (`npm run check:package`, publint + attw) in CI.
+- Release workflow publishing with npm provenance on `v*` tags; SECURITY.md.
+- Benchmark harness (`make bench`) sweeping concurrency levels against a
+  live Riak node.
+
+### Fixed
+- ESM TypeScript consumers resolved CJS-flavored type declarations
+  ("masquerading as CJS"); the `import` condition now serves dedicated
+  `.d.mts` declarations.
 
 ### Changed
 - `destroy()` now drops buffered records and stops issuing requests.

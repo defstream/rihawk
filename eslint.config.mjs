@@ -1,5 +1,6 @@
 import js from '@eslint/js';
 import { defineConfig } from 'eslint/config';
+import globals from 'globals';
 import tseslint from 'typescript-eslint';
 
 export default defineConfig(
@@ -34,10 +35,13 @@ export default defineConfig(
     }
   },
   {
-    // Plain-JS files (config, ESM wrapper, ESM smoke test) are outside the
+    // Plain-JS files (config, ESM wrapper, scripts, bench) are outside the
     // TypeScript program; type-aware rules cannot run on them.
     files: ['**/*.mjs'],
-    extends: [tseslint.configs.disableTypeChecked]
+    extends: [tseslint.configs.disableTypeChecked],
+    languageOptions: {
+      globals: globals.node
+    }
   },
   {
     files: ['test/**'],
