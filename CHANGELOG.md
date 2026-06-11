@@ -12,11 +12,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - OpenSSF Scorecard workflow publishing supply-chain posture results.
 - Opt-in pre-commit hook running lint + typecheck (`make hooks`).
 
+### Changed
+- Dev toolchain upgraded to ESLint 10, TypeScript 6, and `@types/node` 25;
+  the CI lint job builds first so type-aware rules resolve the package's
+  own declarations.
+
 ### Fixed
 - A counter legitimately at 0 emitted `value: undefined` from `putCrdt`
   streams due to `||`-chaining; now uses nullish coalescing.
 - `concurrent: 0` no longer ends streams prematurely; the effective
   minimum is 1.
+- Declaration emit failed under TypeScript 6 (TS4094): client methods now
+  declare named stream return types instead of leaving the compiler to
+  synthesize anonymous class types with private fields.
 
 ## [0.3.0] - 2026-06-10
 
