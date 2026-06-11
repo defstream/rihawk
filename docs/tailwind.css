@@ -1,0 +1,94 @@
+@import "tailwindcss";
+
+@theme {
+  --color-ink: #0c1210;
+  --color-panel: #111916;
+  --color-panel-2: #16201c;
+  --color-line: #283832;
+  --color-line-soft: #1c2a25;
+  --color-cream: #ece3d0;
+  --color-cream-bright: #f7f1e3;
+  --color-faded: #8da097;
+  --color-copper: #d4734f;
+  --color-copper-bright: #ea9068;
+  --color-sage: #87b8a6;
+  --font-display: "Fraunces", "Georgia", serif;
+  --font-mono: "IBM Plex Mono", "SFMono-Regular", monospace;
+}
+
+/* Engineering-vellum dot grid with a vignette holding the page together. */
+.bg-blueprint {
+  background-color: var(--color-ink);
+  background-image:
+    radial-gradient(ellipse 120% 90% at 50% -10%, rgba(135, 184, 166, 0.07), transparent 60%),
+    radial-gradient(circle at 1px 1px, rgba(236, 227, 208, 0.05) 1px, transparent 0);
+  background-size: 100% 100%, 28px 28px;
+}
+
+/* Film grain so the dark field never reads flat. */
+.grain::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.05;
+  z-index: 50;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)' opacity='1'/%3E%3C/svg%3E");
+}
+
+/* Staggered page-load reveal. */
+@keyframes rise {
+  from { opacity: 0; transform: translateY(14px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.rise { opacity: 0; animation: rise 0.7s cubic-bezier(0.22, 1, 0.36, 1) forwards; }
+.d1 { animation-delay: 0.05s; }
+.d2 { animation-delay: 0.15s; }
+.d3 { animation-delay: 0.25s; }
+.d4 { animation-delay: 0.35s; }
+.d5 { animation-delay: 0.5s; }
+.d6 { animation-delay: 0.65s; }
+
+/* The dashed survey ring rotates almost imperceptibly. */
+@keyframes spin-slow {
+  to { transform: rotate(360deg); }
+}
+.spin-slow {
+  animation: spin-slow 90s linear infinite;
+  transform-origin: center;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .rise { animation: none; opacity: 1; }
+  .spin-slow { animation: none; }
+  .ring-dot { display: none; }
+}
+
+/* Hand-set syntax tokens for the code specimen. */
+.tk-kw { color: var(--color-copper-bright); }
+.tk-str { color: var(--color-sage); }
+.tk-fn { color: var(--color-cream-bright); }
+.tk-cm { color: var(--color-faded); font-style: italic; }
+.tk-num { color: var(--color-copper); }
+
+/* Field-manual section rule: § label sitting on a hairline. */
+.section-rule {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+.section-rule::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(to right, var(--color-line), transparent);
+}
+
+.card-hover {
+  transition: border-color 0.25s ease, transform 0.25s ease, background-color 0.25s ease;
+}
+.card-hover:hover {
+  border-color: var(--color-copper);
+  background-color: var(--color-panel-2);
+  transform: translateY(-2px);
+}

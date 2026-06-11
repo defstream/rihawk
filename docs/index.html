@@ -1,0 +1,269 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>rihawk — a streaming Riak client for Node.js</title>
+  <meta name="description" content="rihawk is a streaming Riak KV client for Node.js. Fetch whole keyspaces as one stream: cartesian bucket×key expansion, read-ahead pipelining, CRDTs, AbortSignal, and full TypeScript declarations." />
+  <meta property="og:title" content="rihawk — a streaming Riak client for Node.js" />
+  <meta property="og:description" content="Fetch whole keyspaces as one stream. Cartesian expansion, read-ahead pipelining, CRDTs, TypeScript." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;1,9..144,400&family=IBM+Plex+Mono:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="main.css" />
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='13' fill='none' stroke='%23d4734f' stroke-width='2.5' stroke-dasharray='5 4'/%3E%3Ccircle cx='16' cy='3' r='3.5' fill='%23ece3d0'/%3E%3C/svg%3E" />
+</head>
+<body class="bg-blueprint grain text-cream font-mono antialiased min-h-screen">
+
+  <!-- ===== Header ===== -->
+  <header class="rise d1 max-w-6xl mx-auto px-6 pt-8 flex items-baseline justify-between gap-6">
+    <a href="#" class="font-display text-2xl font-semibold tracking-tight text-cream-bright">
+      rihawk<span class="text-copper">.</span>
+    </a>
+    <nav class="flex gap-6 text-xs uppercase tracking-[0.2em] text-faded">
+      <a href="#streams" class="hover:text-copper-bright transition-colors">Streams</a>
+      <a href="#api" class="hover:text-copper-bright transition-colors">API</a>
+      <a href="https://github.com/defstream/rihawk" class="hover:text-copper-bright transition-colors">GitHub</a>
+      <a href="https://www.npmjs.com/package/rihawk" class="hover:text-copper-bright transition-colors">npm</a>
+    </nav>
+  </header>
+
+  <!-- ===== Hero ===== -->
+  <section class="max-w-6xl mx-auto px-6 pt-16 pb-24 grid lg:grid-cols-12 gap-12 items-center">
+    <div class="lg:col-span-7">
+      <p class="rise d1 text-xs uppercase tracking-[0.3em] text-sage mb-6">
+        Field manual · Riak KV · Node.js ≥ 22
+      </p>
+      <h1 class="rise d2 font-display text-6xl md:text-7xl font-semibold leading-[0.95] text-cream-bright">
+        The whole keyspace,<br />
+        <span class="italic font-normal text-copper-bright">one stream.</span>
+      </h1>
+      <p class="rise d3 mt-8 max-w-xl text-sm leading-relaxed text-faded">
+        rihawk is a streaming Riak client. Hand it buckets and keys — single
+        values or arrays — and it walks every combination as one object-mode
+        stream, prefetching the next batch while you process the last.
+        Written in TypeScript, shipped with declarations, one runtime
+        dependency.
+      </p>
+
+      <div class="rise d4 mt-10 flex flex-wrap items-center gap-4">
+        <div class="flex items-center gap-3 bg-panel border border-line rounded-md px-4 py-3">
+          <span class="text-sage select-none">$</span>
+          <code id="install-cmd" class="text-sm text-cream-bright">npm install rihawk</code>
+          <button id="copy-btn" aria-label="Copy install command"
+            class="ml-2 text-[10px] uppercase tracking-[0.2em] text-faded border border-line rounded px-2 py-1 hover:text-copper-bright hover:border-copper transition-colors cursor-pointer">
+            copy
+          </button>
+        </div>
+        <a href="https://github.com/defstream/rihawk"
+          class="text-xs uppercase tracking-[0.2em] text-copper-bright border-b border-copper/40 pb-1 hover:border-copper-bright transition-colors">
+          Read the source →
+        </a>
+      </div>
+
+      <dl class="rise d5 mt-12 grid grid-cols-3 gap-px bg-line max-w-md border border-line text-center">
+        <div class="bg-panel px-3 py-4">
+          <dt class="text-[10px] uppercase tracking-[0.2em] text-faded">runtime deps</dt>
+          <dd class="mt-1 font-display text-2xl text-cream-bright">1</dd>
+        </div>
+        <div class="bg-panel px-3 py-4">
+          <dt class="text-[10px] uppercase tracking-[0.2em] text-faded">known CVEs</dt>
+          <dd class="mt-1 font-display text-2xl text-cream-bright">0</dd>
+        </div>
+        <div class="bg-panel px-3 py-4">
+          <dt class="text-[10px] uppercase tracking-[0.2em] text-faded">line coverage</dt>
+          <dd class="mt-1 font-display text-2xl text-cream-bright">99<span class="text-copper text-base">%</span></dd>
+        </div>
+      </dl>
+    </div>
+
+    <!-- The ring schematic: Riak's consistent-hash ring with records in flight. -->
+    <figure class="rise d5 lg:col-span-5" aria-label="Schematic of records streaming around a Riak consistent-hash ring">
+      <svg viewBox="0 0 360 360" class="w-full max-w-sm mx-auto" role="img">
+        <title>Records streaming around the consistent-hash ring</title>
+        <defs>
+          <path id="orbit" d="M 180,40 A 140,140 0 1,1 179.9,40" fill="none" />
+          <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
+            <feGaussianBlur stdDeviation="4" result="b" />
+            <feMerge>
+              <feMergeNode in="b" /><feMergeNode in="SourceGraphic" />
+            </feMerge>
+          </filter>
+        </defs>
+
+        <!-- survey rings -->
+        <g class="spin-slow">
+          <circle cx="180" cy="180" r="140" fill="none" stroke="#283832" stroke-width="1" stroke-dasharray="3 7" />
+        </g>
+        <circle cx="180" cy="180" r="168" fill="none" stroke="#1c2a25" stroke-width="1" />
+        <circle cx="180" cy="180" r="112" fill="none" stroke="#1c2a25" stroke-width="1" stroke-dasharray="1 5" />
+
+        <!-- partition arc -->
+        <path d="M 180,40 A 140,140 0 0,1 301,110" fill="none" stroke="#d4734f" stroke-width="2" opacity="0.85" />
+
+        <!-- vnodes at 45° increments -->
+        <g fill="#111916" stroke="#87b8a6" stroke-width="1.5">
+          <rect x="172" y="32" width="16" height="16" />
+          <rect x="271" y="73" width="16" height="16" />
+          <rect x="312" y="172" width="16" height="16" />
+          <rect x="271" y="271" width="16" height="16" />
+          <rect x="172" y="312" width="16" height="16" />
+          <rect x="73" y="271" width="16" height="16" />
+          <rect x="32" y="172" width="16" height="16" />
+          <rect x="73" y="73" width="16" height="16" />
+        </g>
+
+        <!-- centre legend -->
+        <text x="180" y="172" text-anchor="middle" fill="#8da097" font-size="10" letter-spacing="3" font-family="IBM Plex Mono, monospace">2^160</text>
+        <text x="180" y="192" text-anchor="middle" fill="#ece3d0" font-size="11" letter-spacing="2" font-family="IBM Plex Mono, monospace">HASH RING</text>
+
+        <!-- records in flight -->
+        <circle class="ring-dot" r="5" fill="#ea9068" filter="url(#glow)">
+          <animateMotion dur="9s" repeatCount="indefinite"><mpath href="#orbit" /></animateMotion>
+        </circle>
+        <circle class="ring-dot" r="3.5" fill="#ece3d0" filter="url(#glow)">
+          <animateMotion dur="9s" begin="-3s" repeatCount="indefinite"><mpath href="#orbit" /></animateMotion>
+        </circle>
+        <circle class="ring-dot" r="2.5" fill="#87b8a6" filter="url(#glow)">
+          <animateMotion dur="9s" begin="-6s" repeatCount="indefinite"><mpath href="#orbit" /></animateMotion>
+        </circle>
+      </svg>
+      <figcaption class="mt-4 text-center text-[10px] uppercase tracking-[0.25em] text-faded">
+        fig. 01 — records in flight, one batch ahead
+      </figcaption>
+    </figure>
+  </section>
+
+  <!-- ===== Code specimen ===== -->
+  <section id="streams" class="max-w-6xl mx-auto px-6 pb-24">
+    <h2 class="section-rule rise text-xs uppercase tracking-[0.3em] text-sage mb-8">
+      <span>§01 — six keys, two buckets, one stream</span>
+    </h2>
+    <div class="grid lg:grid-cols-12 gap-10">
+      <div class="lg:col-span-7 bg-panel border border-line rounded-lg overflow-hidden">
+        <div class="flex items-center gap-2 px-4 py-3 border-b border-line-soft">
+          <span class="w-2.5 h-2.5 rounded-full bg-copper/70"></span>
+          <span class="w-2.5 h-2.5 rounded-full bg-sage/50"></span>
+          <span class="w-2.5 h-2.5 rounded-full bg-line"></span>
+          <span class="ml-3 text-[10px] uppercase tracking-[0.2em] text-faded">scout.mjs</span>
+        </div>
+        <pre class="p-5 text-[13px] leading-relaxed overflow-x-auto"><code><span class="tk-kw">import</span> rihawk <span class="tk-kw">from</span> <span class="tk-str">'rihawk'</span>;
+
+<span class="tk-kw">const</span> client = <span class="tk-fn">rihawk</span>({ connectionString: <span class="tk-str">'127.0.0.1:8087'</span> });
+
+client.<span class="tk-fn">get</span>([<span class="tk-str">'nfl_team'</span>, <span class="tk-str">'mlb_team'</span>], [<span class="tk-str">'CHI'</span>, <span class="tk-str">'MIA'</span>, <span class="tk-str">'SD'</span>], { r: <span class="tk-num">2</span> }, { concurrent: <span class="tk-num">8</span> })
+  .<span class="tk-fn">on</span>(<span class="tk-str">'data'</span>, (record) => console.<span class="tk-fn">log</span>(record.bucket, record.key))
+  .<span class="tk-fn">on</span>(<span class="tk-str">'error'</span>, (error) => console.<span class="tk-fn">error</span>(error.bucket, error.key)) <span class="tk-cm">// knows what failed</span>
+  .<span class="tk-fn">on</span>(<span class="tk-str">'end'</span>, () => client.<span class="tk-fn">end</span>());</code></pre>
+      </div>
+      <div class="lg:col-span-5 flex flex-col justify-center gap-6 text-sm leading-relaxed text-faded">
+        <p>
+          <span class="text-cream-bright">Arrays expand.</span> Two buckets ×
+          three keys becomes six requests, walked last-dimension-fastest and
+          emitted as one ordered stream of records.
+        </p>
+        <p>
+          <span class="text-cream-bright">Latency overlaps.</span> While your
+          handler runs, the next batch is already on the wire — bounded
+          read-ahead, never more than one batch beyond demand.
+        </p>
+        <p>
+          <span class="text-cream-bright">Failure is addressed.</span> Errors
+          carry their coordinate (<code class="text-copper-bright">error.bucket</code>,
+          <code class="text-copper-bright">error.key</code>) and the stream
+          keeps going. Not-found keys are simply skipped.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== Features ===== -->
+  <section class="max-w-6xl mx-auto px-6 pb-24">
+    <h2 class="section-rule rise text-xs uppercase tracking-[0.3em] text-sage mb-8">
+      <span>§02 — equipment</span>
+    </h2>
+    <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+      <article class="card-hover bg-panel border border-line rounded-lg p-6">
+        <p class="text-[10px] text-copper tracking-[0.25em] mb-3">01 / CARTESIAN STREAMS</p>
+        <p class="text-sm leading-relaxed text-faded">Every method takes single values or arrays for bucket, key, value, index, and op — the full product streams back as one readable.</p>
+      </article>
+      <article class="card-hover bg-panel border border-line rounded-lg p-6">
+        <p class="text-[10px] text-copper tracking-[0.25em] mb-3">02 / READ-AHEAD PIPELINE</p>
+        <p class="text-sm leading-relaxed text-faded">The next batch is prefetched while the consumer drains. Tune <code class="text-cream">concurrent</code> and <code class="text-cream">highWaterMark</code> per call.</p>
+      </article>
+      <article class="card-hover bg-panel border border-line rounded-lg p-6">
+        <p class="text-[10px] text-copper tracking-[0.25em] mb-3">03 / CRDTS</p>
+        <p class="text-sm leading-relaxed text-faded">Counters, sets, and maps via <code class="text-cream">getCrdt</code> / <code class="text-cream">putCrdt</code>, with an <code class="text-cream">updateCounter</code> shorthand.</p>
+      </article>
+      <article class="card-hover bg-panel border border-line rounded-lg p-6">
+        <p class="text-[10px] text-copper tracking-[0.25em] mb-3">04 / ABORT &amp; BACKPRESSURE</p>
+        <p class="text-sm leading-relaxed text-faded">Pass an <code class="text-cream">AbortSignal</code> to cancel mid-flight. Native object-mode backpressure; <code class="text-cream">destroy()</code> stops issuing requests.</p>
+      </article>
+      <article class="card-hover bg-panel border border-line rounded-lg p-6">
+        <p class="text-[10px] text-copper tracking-[0.25em] mb-3">05 / TYPESCRIPT</p>
+        <p class="text-sm leading-relaxed text-faded">Written in strict TypeScript. CJS and ESM entry points each ship correct declarations — validated by publint and attw in CI.</p>
+      </article>
+      <article class="card-hover bg-panel border border-line rounded-lg p-6">
+        <p class="text-[10px] text-copper tracking-[0.25em] mb-3">06 / LIGHT FOOTPRINT</p>
+        <p class="text-sm leading-relaxed text-faded">One runtime dependency (<a href="https://github.com/oleksiyk/no-riak" class="text-sage hover:text-copper-bright transition-colors">no-riak</a>), zero known vulnerabilities, pooled TLS-capable connections.</p>
+      </article>
+    </div>
+  </section>
+
+  <!-- ===== API ===== -->
+  <section id="api" class="max-w-6xl mx-auto px-6 pb-24">
+    <h2 class="section-rule rise text-xs uppercase tracking-[0.3em] text-sage mb-8">
+      <span>§03 — the instrument panel</span>
+    </h2>
+    <div class="bg-panel border border-line rounded-lg overflow-x-auto">
+      <table class="w-full text-left text-[13px]">
+        <thead>
+          <tr class="border-b border-line text-[10px] uppercase tracking-[0.2em] text-faded">
+            <th class="px-5 py-3 font-medium">method</th>
+            <th class="px-5 py-3 font-medium">emits per combination</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-line-soft">
+          <tr><td class="px-5 py-3 text-cream-bright whitespace-nowrap">get(bucket, key, opts?, tune?)</td><td class="px-5 py-3 text-faded">{ bucket, key, vclock, content }</td></tr>
+          <tr><td class="px-5 py-3 text-cream-bright whitespace-nowrap">put(bucket, key, value, opts?, tune?)</td><td class="px-5 py-3 text-faded">{ bucket, key, vclock, content }</td></tr>
+          <tr><td class="px-5 py-3 text-cream-bright whitespace-nowrap">getIndex(bucket, index, value, opts?, tune?)</td><td class="px-5 py-3 text-faded">{ bucket, index, value, keys, continuation }</td></tr>
+          <tr><td class="px-5 py-3 text-cream-bright whitespace-nowrap">getCrdt(bucket, key, opts?, tune?)</td><td class="px-5 py-3 text-faded">{ bucket, key, context, type, value }</td></tr>
+          <tr><td class="px-5 py-3 text-cream-bright whitespace-nowrap">putCrdt(bucket, key, op, opts?, tune?)</td><td class="px-5 py-3 text-faded">{ bucket, key, context, counter_value, … }</td></tr>
+          <tr><td class="px-5 py-3 text-cream-bright whitespace-nowrap">updateCounter(bucket, key, n, opts?, tune?)</td><td class="px-5 py-3 text-faded">counter result; negative n decrements</td></tr>
+          <tr><td class="px-5 py-3 text-cream-bright whitespace-nowrap">getCounter(bucket, key, opts?, tune?)</td><td class="px-5 py-3 text-faded">alias of getCrdt</td></tr>
+          <tr><td class="px-5 py-3 text-cream-bright whitespace-nowrap">end()</td><td class="px-5 py-3 text-faded">closes the connection pool — returns a promise</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="mt-4 text-xs text-faded">
+      <span class="text-sage">tune</span> = { concurrent, highWaterMark, signal } ·
+      full reference in the
+      <a href="https://github.com/defstream/rihawk#api" class="text-copper-bright hover:text-cream-bright transition-colors border-b border-copper/40">README</a>
+    </p>
+  </section>
+
+  <!-- ===== Footer ===== -->
+  <footer class="border-t border-line-soft">
+    <div class="max-w-6xl mx-auto px-6 py-10 flex flex-wrap items-baseline justify-between gap-6 text-xs text-faded">
+      <p>
+        <span class="font-display text-base text-cream-bright">rihawk<span class="text-copper">.</span></span>
+        <span class="ml-3">MIT © Hector Gray</span>
+      </p>
+      <nav class="flex gap-6 uppercase tracking-[0.2em]">
+        <a href="https://github.com/defstream/rihawk" class="hover:text-copper-bright transition-colors">GitHub</a>
+        <a href="https://www.npmjs.com/package/rihawk" class="hover:text-copper-bright transition-colors">npm</a>
+        <a href="https://github.com/defstream/rihawk/blob/master/CHANGELOG.md" class="hover:text-copper-bright transition-colors">Changelog</a>
+        <a href="https://github.com/defstream/rihawk/blob/master/SECURITY.md" class="hover:text-copper-bright transition-colors">Security</a>
+      </nav>
+    </div>
+  </footer>
+
+  <script>
+    document.getElementById('copy-btn').addEventListener('click', async (event) => {
+      await navigator.clipboard.writeText(document.getElementById('install-cmd').textContent);
+      event.target.textContent = 'copied';
+      setTimeout(() => { event.target.textContent = 'copy'; }, 1500);
+    });
+  </script>
+</body>
+</html>

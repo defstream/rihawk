@@ -9,7 +9,7 @@
   "author": {
     "name": "Hector Gray",
     "email": "defstream@gmail.com",
-    "url": "http://www.hectorgray.com"
+    "url": "https://www.hectorgray.com"
   },
   "repository": {
     "type": "git",
@@ -52,10 +52,12 @@
   "devDependencies": {
     "@arethetypeswrong/cli": "^0.18.3",
     "@eslint/js": "^10.0.1",
+    "@tailwindcss/cli": "^4.3.0",
     "@types/node": "^25.9.3",
     "eslint": "^10.4.1",
     "globals": "^17.6.0",
     "publint": "^0.3.21",
+    "tailwindcss": "^4.3.0",
     "typescript": "^6.0.3",
     "typescript-eslint": "^8.0.0"
   },
@@ -68,6 +70,7 @@
     "lint": "eslint .",
     "typecheck": "tsc -p tsconfig.json",
     "check:package": "publint && attw --pack .",
+    "docs:css": "tailwindcss -i docs/tailwind.css -o docs/main.css --minify",
     "prepack": "npm run build"
   },
   "publishConfig": {

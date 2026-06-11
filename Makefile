@@ -1,6 +1,6 @@
 .DEFAULT_GOAL := help
 
-.PHONY: help install hooks ci build test coverage watch lint typecheck check-package audit clean riak-up riak-down verify bench
+.PHONY: help install hooks ci build test coverage watch lint typecheck check-package docs audit clean riak-up riak-down verify bench
 
 help: ## Show this help
 	@awk 'BEGIN {FS = ":.*##"} /^[a-zA-Z_-]+:.*##/ {printf "  \033[36m%-12s\033[0m %s\n", $$1, $$2}' $(MAKEFILE_LIST)
@@ -36,6 +36,9 @@ typecheck: ## Type-check src/ and test/ without emitting
 
 check-package: ## Validate exports map and shipped types (publint + attw)
 	npm run check:package
+
+docs: ## Rebuild the GitHub Pages site CSS (docs/main.css)
+	npm run docs:css
 
 audit: ## Check dependencies for known vulnerabilities
 	npm audit

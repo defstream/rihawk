@@ -8,6 +8,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- GitHub Pages site at <https://defstream.github.io/rihawk/> (Tailwind CSS,
+  served from `docs/`; rebuild styles with `make docs`).
 - Stylistic type-checked linting (`tseslint.configs.stylisticTypeChecked`).
 - OpenSSF Scorecard workflow publishing supply-chain posture results.
 - Opt-in pre-commit hook running lint + typecheck (`make hooks`).

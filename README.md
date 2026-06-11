@@ -6,6 +6,8 @@ A streaming Riak client with advanced features, built on
 [no-riak](https://github.com/oleksiyk/no-riak). Written in TypeScript —
 type declarations ship with the package.
 
+**Website:** <https://defstream.github.io/rihawk/>
+
 Every client method accepts single values **or arrays** for its bucket/key style
 parameters and returns an object-mode readable stream that emits one record per
 response across the full combination of inputs — so fetching six keys from two
