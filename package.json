@@ -52,7 +52,7 @@
   "devDependencies": {
     "@arethetypeswrong/cli": "^0.18.3",
     "@eslint/js": "^10.0.1",
-    "@types/node": "^22.0.0",
+    "@types/node": "^25.9.3",
     "eslint": "^10.4.1",
     "globals": "^17.6.0",
     "publint": "^0.3.21",
