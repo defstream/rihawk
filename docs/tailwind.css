@@ -1,27 +1,27 @@
 @import "tailwindcss";
 
 @theme {
-  --color-ink: #0c1210;
-  --color-panel: #111916;
-  --color-panel-2: #16201c;
-  --color-line: #283832;
-  --color-line-soft: #1c2a25;
-  --color-cream: #ece3d0;
-  --color-cream-bright: #f7f1e3;
-  --color-faded: #8da097;
-  --color-copper: #d4734f;
-  --color-copper-bright: #ea9068;
-  --color-sage: #87b8a6;
+  --color-ink: #081626;
+  --color-panel: #0d1f35;
+  --color-panel-2: #122844;
+  --color-line: #1f3a5c;
+  --color-line-soft: #152b47;
+  --color-paper: #d9e8f5;
+  --color-paper-bright: #eef6fd;
+  --color-faded: #7d96b4;
+  --color-accent: #54c8e8;
+  --color-accent-bright: #7fdcf5;
+  --color-signal: #e8c45c;
   --font-display: "Fraunces", "Georgia", serif;
   --font-mono: "IBM Plex Mono", "SFMono-Regular", monospace;
 }
 
-/* Engineering-vellum dot grid with a vignette holding the page together. */
+/* Cyanotype dot grid with a cold vignette holding the page together. */
 .bg-blueprint {
   background-color: var(--color-ink);
   background-image:
-    radial-gradient(ellipse 120% 90% at 50% -10%, rgba(135, 184, 166, 0.07), transparent 60%),
-    radial-gradient(circle at 1px 1px, rgba(236, 227, 208, 0.05) 1px, transparent 0);
+    radial-gradient(ellipse 120% 90% at 50% -10%, rgba(84, 200, 232, 0.07), transparent 60%),
+    radial-gradient(circle at 1px 1px, rgba(217, 232, 245, 0.05) 1px, transparent 0);
   background-size: 100% 100%, 28px 28px;
 }
 
@@ -65,11 +65,11 @@
 }
 
 /* Hand-set syntax tokens for the code specimen. */
-.tk-kw { color: var(--color-copper-bright); }
-.tk-str { color: var(--color-sage); }
-.tk-fn { color: var(--color-cream-bright); }
+.tk-kw { color: var(--color-accent-bright); }
+.tk-str { color: var(--color-signal); }
+.tk-fn { color: var(--color-paper-bright); }
 .tk-cm { color: var(--color-faded); font-style: italic; }
-.tk-num { color: var(--color-copper); }
+.tk-num { color: var(--color-accent); }
 
 /* Field-manual section rule: § label sitting on a hairline. */
 .section-rule {
@@ -88,7 +88,7 @@
   transition: border-color 0.25s ease, transform 0.25s ease, background-color 0.25s ease;
 }
 .card-hover:hover {
-  border-color: var(--color-copper);
+  border-color: var(--color-accent);
   background-color: var(--color-panel-2);
   transform: translateY(-2px);
 }
